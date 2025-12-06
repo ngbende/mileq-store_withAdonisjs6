@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
+
+  <!-- HEADER -->
+  <header class="bg-white shadow p-4 flex justify-between items-center sticky top-0 z-20">
+    <h1 class="text-lg sm:text-2xl font-bold">Dashboard Admin</h1>
+    <div class="flex items-center gap-4">
+      <span class="text-gray-600 hidden sm:inline">Admin connecté</span>
+      <a href="/admin/logout" class="text-red-600 font-semibold hover:text-red-800 transition">Déconnexion</a>
+    </div>
+  </header>
+
+  <div class="flex flex-1">
+
+    <!-- SIDEBAR -->
+    <aside class="bg-white shadow p-4 w-64 hidden md:block flex-shrink-0">
+      <h2 class="text-lg font-semibold mb-4">Interactions importantes</h2>
+      
+      <form id="contactForm" class="space-y-4 mb-6">
+        <div>
+          <label class="block font-medium text-gray-700">WhatsApp</label>
+          <input type="text" name="whatsapp" placeholder="+243 123 456 789"
+                 class="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"/>
+        </div>
+        <div>
+          <label class="block font-medium text-gray-700">Email</label>
+          <input type="email" name="email" placeholder="support@example.com"
+                 class="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"/>
+        </div>
+        <button type="submit" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition">
+          Mettre à jour
+        </button>
+      </form>
+
+      <ul class="space-y-3 text-gray-700">
+        <li>
+          <strong>Poster un article:</strong>
+          <p class="text-sm text-gray-500">Pour publier du contenu texte, image ou vidéo</p>
+        </li>
+        <li>
+          <strong>Voir les statistiques:</strong>
+          <p class="text-sm text-gray-500">Nombre de posts, utilisateurs</p>
+        </li>
+      </ul>
+    </aside>
+
+<!-- CONTENU PRINCIPAL -->
+<main class="flex-1 p-4">
+  <h2 class="text-2xl font-bold mb-6">Ajouter un nouveau produit</h2>
+
+  <form id="postForm" class="bg-white p-6 rounded-xl shadow max-w-2xl mx-auto space-y-4" enctype="multipart/form-data">
+    
+    <!-- Nom du produit -->
+    <div>
+      <label class="block text-gray-700 font-medium mb-1" for="name">Nom du produit</label>
+      <input type="text" id="name" name="name" placeholder="Ex: T-shirt Blanc"
+             class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+    </div>
+
+    <!-- Description -->
+    <div>
+      <label class="block text-gray-700 font-medium mb-1" for="description">Description</label>
+      <textarea id="description" name="description" placeholder="Décrivez le produit, ses caractéristiques et avantages..."
+                rows="4"
+                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+    </div>
+
+    <!-- Prix (optionnel) -->
+    <div>
+      <label class="block text-gray-700 font-medium mb-1" for="price">Prix (optionnel)</label>
+<input type="text" name="price" placeholder="Ex: 1999 ou 10$" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+    </div>
+
+    <!-- Média principal -->
+    <div>
+      <label class="block text-gray-700 font-medium mb-1">Fichier média principal</label>
+      <input type="file" id="media" name="media" accept="image/*,video/*" class="w-full text-gray-600"/>
+      <p class="text-gray-500 text-sm mt-1">Image ou vidéo du produit phare</p>
+    </div>
+
+    <!-- Aperçu dynamique -->
+    <div id="preview" class="mt-4 hidden">
+      <p class="text-gray-500 text-sm mb-2">Aperçu:</p>
+      <div id="mediaPreview" class="border border-gray-300 rounded p-2 flex justify-center items-center min-h-[150px]">
+        <span class="text-gray-400">Aucun média sélectionné</span>
+      </div>
+    </div>
+
+    <!-- Section variantes -->
+    <div>
+      <h3 class="text-lg font-semibold mb-2">Ajouter variantes (optionnel)</h3>
+      <div id="variantsContainer" class="space-y-2">
+        <!-- Exemple de variante clonable -->
+      </div>
+      <button type="button" id="addVariantBtn" class="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300 transition">
+        + Ajouter une variante
+      </button>
+    </div>
+
+    <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 hover:shadow-lg transition font-medium">
+      Publier
+    </button>
+  </form>
+</main>
+
+<script>
+const mediaInput = document.getElementById('media')
+const mediaPreview = document.getElementById('mediaPreview')
+const previewContainer = document.getElementById('preview')
+
+// Vide la preview et cache le conteneur
+function clearPreview() {
+  mediaPreview.innerHTML = '<span class="text-gray-400">Aucun média sélectionné</span>'
+  previewContainer.classList.add('hidden')
+}
+
+// Met à jour la preview à chaque changement de fichier
+function updatePreview() {
+  const file = mediaInput.files[0]
+  if (!file) {
+    clearPreview()
+    return
+  }
+
+  // Affiche le conteneur et vide l'ancienne preview
+  previewContainer.classList.remove('hidden')
+  mediaPreview.innerHTML = ''
+
+  const type = file.type.startsWith('image') ? 'image' : 'video'
+
+  if (type === 'image') {
+    const img = document.createElement('img')
+    img.src = URL.createObjectURL(file)
+    img.className = 'max-h-60 object-contain'
+    mediaPreview.appendChild(img)
+  } else {
+    const video = document.createElement('video')
+    video.src = URL.createObjectURL(file)
+    video.controls = true
+    video.className = 'max-h-60'
+    mediaPreview.appendChild(video)
+  }
+}
+
+// Événement pour déclencher la preview
+mediaInput.addEventListener('change', updatePreview)
+</script>
+
+<script>const addVariantBtn = document.getElementById('addVariantBtn')
+const variantsContainer = document.getElementById('variantsContainer')
+let variantCount = 0
+
+addVariantBtn.addEventListener('click', () => {
+  variantCount++
+  const variantDiv = document.createElement('div')
+  variantDiv.className = 'border p-3 rounded space-y-2 bg-gray-50'
+  variantDiv.innerHTML = `
+    <h4 class="font-semibold mb-2">Variante ${variantCount}</h4>
+    <input type="text" name="variants[${variantCount}][color]" placeholder="Couleur" class="w-full border rounded px-2 py-1"/>
+    <input type="text" name="variants[${variantCount}][size]" placeholder="Taille" class="w-full border rounded px-2 py-1"/>
+<input type="text" name="variants[${variantCount}][price]" placeholder="Prix (ex: 10$)" class="w-full border rounded px-2 py-1"/>
+    <input type="number" name="variants[${variantCount}][stock]" placeholder="Stock" class="w-full border rounded px-2 py-1"/>
+    <label class="block mt-2 text-gray-700 font-medium">Fichier média</label>
+    <input type="file" name="variants[${variantCount}][media]" accept="image/*,video/*" class="variantMedia w-full text-gray-600"/>
+    <div class="variantPreview border border-gray-300 rounded p-2 flex justify-center items-center min-h-[100px] text-gray-400">
+      Aucun média sélectionné
+    </div>
+  `
+  variantsContainer.appendChild(variantDiv)
+
+  // Ajouter preview pour ce média
+  const mediaInput = variantDiv.querySelector('.variantMedia')
+  const mediaPreview = variantDiv.querySelector('.variantPreview')
+
+  mediaInput.addEventListener('change', () => {
+    const file = mediaInput.files[0]
+    mediaPreview.innerHTML = ''
+    if (!file) {
+      mediaPreview.textContent = 'Aucun média sélectionné'
+      mediaPreview.classList.add('text-gray-400')
+      return
+    }
+
+    const type = file.type.startsWith('image') ? 'image' : 'video'
+    if (type === 'image') {
+      const img = document.createElement('img')
+      img.src = URL.createObjectURL(file)
+      img.className = 'max-h-40 object-contain'
+      mediaPreview.appendChild(img)
+    } else {
+      const video = document.createElement('video')
+      video.src = URL.createObjectURL(file)
+      video.controls = true
+      video.className = 'max-h-40'
+      mediaPreview.appendChild(video)
+    }
+  })
+})
+</script>
+
+</body>
+</html>

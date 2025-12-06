@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accueil — Mileq Store</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- HEADER -->
+  <header class="bg-white shadow sticky top-0 z-20">
+    <div class="max-w-6xl mx-auto flex items-center justify-between p-4">
+      <h1 class="text-lg sm:text-2xl font-bold text-gray-800">
+        Mileq Store
+      </h1>
+
+      <nav>
+        <a 
+          href="/login" 
+          class="text-blue-600 font-semibold hover:text-blue-800 transition"
+        >
+          Espace Admin
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO SECTION -->
+  <section class="px-4 mt-8">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-3xl sm:text-4xl font-extrabold mb-3">
+        Produits phares 🔥
+      </h2>
+
+      <p class="text-gray-600 text-base sm:text-lg">
+        Découvrez nos meilleurs produits du moment, disponibles en stock.
+      </p>
+    </div>
+  </section>
+
+  <!-- GRID PRODUITS -->
+  <section class="mt-10 px-4">
+    <div class="max-w-6xl mx-auto grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+
+      <!-- CARD PRODUIT (à répéter dans une boucle) -->
+      <!-- Exemple : -->
+      @each(product in products)
+      <div class="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden">
+        
+        <!-- IMAGE -->
+        <img 
+          src="{{ product.image_url }}" 
+          alt="{{ product.name }}" 
+          class="w-full h-48 object-cover"
+        >
+
+        <!-- INFOS -->
+        <div class="p-4">
+          <h3 class="text-lg font-semibold mb-1">
+            {{ product.name }}
+          </h3>
+
+          <!-- Prix -->
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-xl font-bold text-blue-600">
+              {{ product.price }}$
+            </span>
+
+            @if(product.old_price)
+            <span class="line-through text-gray-400 text-sm">
+              {{ product.old_price }}$
+            </span>
+            @endif
+          </div>
+
+          <!-- Bouton -->
+          <a 
+            href="/product/{{ product.id }}"
+            class="block bg-blue-600 text-white text-center py-2 rounded-lg hover:bg-blue-700 transition"
+          >
+            Voir le produit
+          </a>
+        </div>
+
+      </div>
+      @endeach
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="mt-20 text-center text-gray-500 py-6">
+    &copy; {{ new Date().getFullYear() }} — Mileq Store.
+  </footer>
+
+</body>
+</html>
