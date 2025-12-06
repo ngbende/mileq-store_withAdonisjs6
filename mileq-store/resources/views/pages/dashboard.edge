@@ -54,9 +54,8 @@
 <!-- CONTENU PRINCIPAL -->
 <main class="flex-1 p-4">
   <h2 class="text-2xl font-bold mb-6">Ajouter un nouveau produit</h2>
-
-  <form id="postForm" class="bg-white p-6 rounded-xl shadow max-w-2xl mx-auto space-y-4" enctype="multipart/form-data">
-    
+  <form id="postForm" action="{{ route('products.store') }}" class="bg-white p-6 rounded-xl shadow max-w-2xl mx-auto space-y-4" enctype="multipart/form-data" method="POST" >
+    {{ csrfField() }}
     <!-- Nom du produit -->
     <div>
       <label class="block text-gray-700 font-medium mb-1" for="name">Nom du produit</label>
@@ -81,7 +80,7 @@
     <!-- Média principal -->
     <div>
       <label class="block text-gray-700 font-medium mb-1">Fichier média principal</label>
-      <input type="file" id="media" name="media" accept="image/*,video/*" class="w-full text-gray-600"/>
+      <input type="file" id="media" name="main_media_url" accept="image/*,video/*" class="w-full text-gray-600"/>
       <p class="text-gray-500 text-sm mt-1">Image ou vidéo du produit phare</p>
         <button type="button" id="clearMediaBtn" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition">
     Annuler
