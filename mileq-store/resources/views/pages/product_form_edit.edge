@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modifier Produit Phare</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-blue-50 text-gray-800 flex flex-col min-h-screen">
+
+  <!-- HEADER -->
+  <header class="bg-white shadow p-4 flex justify-between items-center sticky top-0 z-20">
+    <h1 class="text-lg sm:text-2xl font-bold">Dashboard Admin</h1>
+    <div class="flex items-center gap-4">
+      <a href="/admin/logout" class="text-red-600 font-semibold hover:text-red-800 transition">Déconnexion</a>
+    </div>
+  </header>
+
+  <div class="flex flex-1 flex-col md:flex-row">
+
+    <!-- SIDEBAR -->
+    <aside class="bg-white shadow p-4 w-full md:w-64 flex-shrink-0 mb-4 md:mb-0">
+      <h2 class="text-lg font-semibold mb-4">Menu Admin</h2>
+      <ul class="space-y-2">
+        <li>
+          <a href="/admin/edit_product/" class="block w-full text-center bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
+            Retour aux produits
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- FORMULAIRE MODIFICATION -->
+    <main class="flex-1 p-4">
+      <!-- Messages Flash -->
+      @if(flashMessages.has('success'))
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+          {{ flashMessages.get('success') }}
+        </div>
+      @endif
+
+      @if(flashMessages.has('error'))
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {{ flashMessages.get('error') }}
+        </div>
+      @endif
+
+      <div class="bg-white p-6 rounded-xl shadow max-w-3xl mx-auto space-y-6">
+        <h2 class="text-2xl font-bold mb-4 text-center">Modifier Produit Phare</h2>
+        <form action="{{ route('products.update', { id: product.id }) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+          {{ csrfField() }}
+     
+          <!-- Nom produit -->
+          <div>
+            <label class="block text-gray-700 font-medium mb-1" for="name">Nom du produit</label>
+            <input type="text" id="name" name="name" value="{{ product.name }}" placeholder="Ex: T-shirt Blanc"
+                   class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+          </div>
+
+          <!-- Description -->
+          <div>
+            <label class="block text-gray-700 font-medium mb-1" for="description">Description</label>
+            <textarea id="description" name="description" placeholder="Décrivez le produit..."
+                      rows="4"
+                      class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ product.description }}</textarea>
+          </div>
+
+          <!-- Prix -->
+          <div>
+            <label class="block text-gray-700 font-medium mb-1" for="price">Prix (optionnel)</label>
+            <input type="text" id="price" name="price" value="{{ product.price ?? '' }}" placeholder="Ex: 10$ ou 1999"
+                   class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+            <p class="text-gray-500 text-sm mt-1">Laissez vide si prix sur demande</p>
+          </div>
+
+          <!-- Média principal -->
+          <div>
+            <label class="block text-gray-700 font-medium mb-1">Fichier média principal</label>
+            <input type="file" id="media" name="main_media_url" accept="image/*,video/*" class="w-full text-gray-600"/>
+            <p class="text-gray-500 text-sm mt-1">Image ou vidéo du produit phare (optionnel)</p>
+          </div>
+
+          <!-- Aperçu média -->
+          <div id="preview" class="mt-2 {{ product.mainMediaUrl ? '' : 'hidden' }}">
+            <p class="text-gray-500 text-sm mb-2">Aperçu :</p>
+            <div id="mediaPreview" class="border border-gray-300 rounded p-2 flex justify-center items-center min-h-[150px]">
+              @if(product.mainMediaUrl)
+                @if(product.mainMediaType === 'video')
+                  <video src="{{ product.mainMediaUrl }}" controls class="max-h-60"></video>
+                @else
+                  <img src="{{ product.mainMediaUrl }}" class="max-h-60 object-contain"/>
+                @endif
+              @else
+                <span class="text-gray-400">Aucun média sélectionné</span>
+              @endif
+            </div>
+            <button type="button" id="clearMediaBtn" class="mt-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition">
+              Annuler
+            </button>
+          </div>
+
+          <!-- Variantes -->
+          <div id="variantsContainer" class="space-y-2">
+            <h3 class="text-lg font-semibold text-gray-700 mb-2">Variantes du produit</h3>
+            
+          @if(product.variants && product.variants.length > 0)
+  @each((variant, index) in product.variants)
+    @if(variant && variant.id)
+      <div class="border p-3 rounded space-y-2 bg-gray-50" id="variant-{{ variant.id }}">
+        <!-- Champ caché pour l'ID de la variante -->
+        <input type="hidden" name="variants[{{ index }}][id]" value="{{ variant.id }}">
+        
+        <input type="text" name="variants[{{ index }}][color]" value="{{ variant.color }}" placeholder="Couleur" class="w-full border rounded px-2 py-1"/>
+        <input type="text" name="variants[{{ index }}][size]" value="{{ variant.size }}" placeholder="Taille" class="w-full border rounded px-2 py-1"/>
+        <input type="text" name="variants[{{ index }}][otherAttr]" value="{{ variant.otherAttr }}" placeholder="Modèle/Marque/Matériau" class="w-full border rounded px-2 py-1"/>
+        <input type="text" name="variants[{{ index }}][price]" value="{{ variant.price }}" placeholder="Prix" class="w-full border rounded px-2 py-1"/>
+        <input type="number" name="variants[{{ index }}][stock]" value="{{ variant.stock }}" placeholder="Stock" class="w-full border rounded px-2 py-1"/>
+        
+        <!-- Champ pour nouveau média de variante -->
+        <input type="file" name="variants[{{ index }}][media_url]" class="w-full text-gray-600"/>
+        
+        <!-- Afficher le média actuel -->
+        @if(variant.mediaUrl)
+          <div class="mt-2">
+            <p class="text-gray-500 text-sm">Média actuel:</p>
+            @if(variant.mediaType === 'video')
+              <video src="{{ variant.mediaUrl }}" controls class="max-h-40"></video>
+            @else
+              <img src="{{ variant.mediaUrl }}" class="max-h-40 object-contain"/>
+            @endif
+          </div>
+        @endif
+        
+        <!-- Bouton pour supprimer cette variante -->
+        <button type="button" class="text-red-600 text-sm hover:text-red-800" 
+                onclick="deleteVariant({{ variant.id }})">
+          Supprimer cette variante
+        </button>
+      </div>
+    @endif
+  @endeach
+@else
+  <p class="text-gray-500 text-sm">Aucune variante pour ce produit.</p>
+@endif
+            
+            <!-- Bouton pour ajouter une nouvelle variante -->
+            <button type="button" onclick="addNewVariant()" 
+                    class="mt-4 bg-blue-100 text-blue-600 px-4 py-2 rounded hover:bg-blue-200 transition">
+              + Ajouter une nouvelle variante
+            </button>
+          </div>
+
+          <button type="submit" class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 transition font-medium">
+            Mettre à jour le produit
+          </button>
+        </form>
+      </div>
+    </main>
+  </div>
+
+<!-- Script Preview Média -->
+<script>
+  const mediaInput = document.getElementById('media')
+  const mediaPreview = document.getElementById('mediaPreview')
+  const previewContainer = document.getElementById('preview')
+  const clearMediaBtn = document.getElementById('clearMediaBtn')
+
+  function clearPreview() {
+    mediaPreview.innerHTML = '<span class="text-gray-400">Aucun média sélectionné</span>'
+    previewContainer.classList.add('hidden')
+    mediaInput.value = ''
+  }
+
+  function updatePreview() {
+    const file = mediaInput.files[0]
+    if (!file) { clearPreview(); return }
+    previewContainer.classList.remove('hidden')
+    mediaPreview.innerHTML = ''
+    const type = file.type.startsWith('image') ? 'image' : 'video'
+    if(type==='image'){
+      const img = document.createElement('img')
+      img.src = URL.createObjectURL(file)
+      img.className='max-h-60 object-contain'
+      mediaPreview.appendChild(img)
+    } else {
+      const video = document.createElement('video')
+      video.src = URL.createObjectURL(file)
+      video.controls = true
+      video.className='max-h-60'
+      mediaPreview.appendChild(video)
+    }
+  }
+
+  mediaInput.addEventListener('change', updatePreview)
+  clearMediaBtn.addEventListener('click', clearPreview)
+
+  // Gestion des variantes
+  let variantCount = {{ product.variants ? product.variants.length : 0 }};
+
+  function addNewVariant() {
+    const container = document.getElementById('variantsContainer');
+    const newVariantIndex = variantCount;
+    
+    const newVariantHTML = `
+      <div class="border p-3 rounded space-y-2 bg-gray-50" id="new-variant-${newVariantIndex}">
+        <input type="hidden" name="new_variants[${newVariantIndex}][id]" value="">
+        <input type="text" name="new_variants[${newVariantIndex}][color]" placeholder="Couleur" class="w-full border rounded px-2 py-1"/>
+        <input type="text" name="new_variants[${newVariantIndex}][size]" placeholder="Taille" class="w-full border rounded px-2 py-1"/>
+         <input type="text" name="new_variants[${newVariantIndex}][otherAttr]" placeholder="Modèle/Marque/Matériau" class="w-full border rounded px-2 py-1"/>
+        <input type="text" name="new_variants[${newVariantIndex}][price]" placeholder="Prix" class="w-full border rounded px-2 py-1"/>
+        <input type="number" name="new_variants[${newVariantIndex}][stock]" placeholder="Stock" class="w-full border rounded px-2 py-1"/>
+        <label class="block text-gray-700 font-medium mt-2">Fichier média (optionnel)</label>
+        <input type="file" id="new-variant-media-${newVariantIndex}" name="new_variants[${newVariantIndex}][media_url]" accept="image/*,video/*" class="w-full text-gray-600 variant-media-input"/>
+        
+        <!-- Conteneur pour la prévisualisation -->
+        <div id="new-variant-preview-${newVariantIndex}" class="mt-2 variant-preview hidden">
+          <p class="text-gray-500 text-sm mb-1">Aperçu:</p>
+          <div class="border border-gray-300 rounded p-2 flex justify-center items-center min-h-[100px]">
+            <span class="text-gray-400">Aucun média sélectionné</span>
+          </div>
+          <button type="button" class="mt-1 bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600 transition" onclick="clearVariantPreview(${newVariantIndex})">
+            Supprimer le média
+          </button>
+        </div>
+        
+        <button type="button" class="text-red-600 text-sm hover:text-red-800 mt-2" 
+                onclick="removeNewVariant(${newVariantIndex})">
+          Supprimer cette variante
+        </button>
+      </div>
+    `;
+    
+    // Ajouter avant le bouton "Ajouter une nouvelle variante"
+    const addButton = container.querySelector('button[onclick*="addNewVariant"]');
+    container.insertBefore(document.createRange().createContextualFragment(newVariantHTML), addButton);
+    
+    // Ajouter l'événement pour la prévisualisation du média
+    setTimeout(() => {
+      const mediaInput = document.getElementById(`new-variant-media-${newVariantIndex}`);
+      const previewContainer = document.getElementById(`new-variant-preview-${newVariantIndex}`);
+      
+      if (mediaInput) {
+        mediaInput.addEventListener('change', function() {
+          const file = this.files[0];
+          if (!file) return;
+          
+          previewContainer.classList.remove('hidden');
+          const previewDiv = previewContainer.querySelector('div');
+          previewDiv.innerHTML = '';
+          
+          const type = file.type.startsWith('image') ? 'image' : 'video';
+          if (type === 'image') {
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.className = 'max-h-40 object-contain';
+            previewDiv.appendChild(img);
+          } else {
+            const video = document.createElement('video');
+            video.src = URL.createObjectURL(file);
+            video.controls = true;
+            video.className = 'max-h-40';
+            previewDiv.appendChild(video);
+          }
+        });
+      }
+    }, 100);
+    
+    variantCount++;
+  }
+
+  function clearVariantPreview(index) {
+    const mediaInput = document.getElementById(`new-variant-media-${index}`);
+    const previewContainer = document.getElementById(`new-variant-preview-${index}`);
+    const previewDiv = previewContainer.querySelector('div');
+    
+    mediaInput.value = '';
+    previewDiv.innerHTML = '<span class="text-gray-400">Aucun média sélectionné</span>';
+    previewContainer.classList.add('hidden');
+  }
+
+  function removeNewVariant(index) {
+    const variantElement = document.getElementById(`new-variant-${index}`);
+    if (variantElement) {
+      variantElement.remove();
+    }
+  }
+
+  function deleteVariant(variantId) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette variante ?')) {
+      // Créer un champ caché pour marquer la variante à supprimer
+      const container = document.getElementById('variantsContainer');
+      const deleteInput = document.createElement('input');
+      deleteInput.type = 'hidden';
+      deleteInput.name = 'variants_to_delete[]';
+      deleteInput.value = variantId;
+      container.appendChild(deleteInput);
+      
+      // Cacher le conteneur de la variante
+      const variantDiv = document.getElementById(`variant-${variantId}`);
+      if (variantDiv) {
+        variantDiv.style.display = 'none';
+      }
+    }
+  }
+
+  // Ajouter également la prévisualisation pour les fichiers de variantes existantes
+  document.addEventListener('DOMContentLoaded', function() {
+    // Pour chaque input file de variante existante
+    document.querySelectorAll('input[name^="variants["][name$="][media_url]"]').forEach(input => {
+      input.addEventListener('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+        
+        // Trouver le conteneur parent
+        const parentDiv = this.closest('.border');
+        let previewDiv = parentDiv.querySelector('.variant-preview');
+        
+        if (!previewDiv) {
+          // Créer un conteneur de prévisualisation s'il n'existe pas
+          previewDiv = document.createElement('div');
+          previewDiv.className = 'mt-2 variant-preview';
+          previewDiv.innerHTML = `
+            <p class="text-gray-500 text-sm mb-1">Nouvel aperçu:</p>
+            <div class="border border-gray-300 rounded p-2 flex justify-center items-center min-h-[100px]"></div>
+            <button type="button" class="mt-1 bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600 transition" onclick="this.parentElement.classList.add('hidden'); this.previousElementSibling.innerHTML = '<span class=\\'text-gray-400\\'>Aucun média sélectionné</span>'; this.closest('.border').querySelector('input[type=\\'file\\']').value = ''">
+              Supprimer le média
+            </button>
+          `;
+          this.parentNode.insertBefore(previewDiv, this.nextSibling);
+        } else {
+          previewDiv.classList.remove('hidden');
+        }
+        
+        const mediaContainer = previewDiv.querySelector('div');
+        mediaContainer.innerHTML = '';
+        
+        const type = file.type.startsWith('image') ? 'image' : 'video';
+        if (type === 'image') {
+          const img = document.createElement('img');
+          img.src = URL.createObjectURL(file);
+          img.className = 'max-h-40 object-contain';
+          mediaContainer.appendChild(img);
+        } else {
+          const video = document.createElement('video');
+          video.src = URL.createObjectURL(file);
+          video.controls = true;
+          video.className = 'max-h-40';
+          mediaContainer.appendChild(video);
+        }
+      });
+    });
+  });
+</script>
+</body>
+</html>

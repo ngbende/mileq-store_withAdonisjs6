@@ -9,25 +9,25 @@ export default class ProductVariant extends BaseModel {
   declare productId: number
 
   @column()
-  declare color?: string
+  declare color: string | null
 
   @column()
-  declare size?: string
+  declare size: string | null
 
   @column()
-  declare otherAttr?: string
+  declare otherAttr: string | null
 
   @column()
-  declare mediaUrl?: string  // image ou vidéo
+  declare mediaUrl: string | null  // image ou vidéo
 
   @column()
-  declare mediaType?: 'image' | 'video'
+  declare mediaType: 'image' | 'video' | null
 
   @column()
-  declare stock?: number
+  declare stock: number | null
 
   @column()
-  declare price?: number  // valeur numérique, devise gérée côté front
+  declare price: number | null  // valeur numérique, devise gérée côté front
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

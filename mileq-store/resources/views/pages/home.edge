@@ -1,18 +1,11 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Accueil — Mileq Store</title>
-  
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Meta pour SEO -->
+@layout.app({ title: 'Accueil — Mileq Store' })
+
+@slot('meta')
   <meta name="description" content="Découvrez nos meilleurs produits phares du moment">
-  
+@endslot
+
+@slot('styles')
   <style>
-    /* Custom styles pour mobile-first */
     .aspect-video {
       aspect-ratio: 16 / 9;
     }
@@ -22,28 +15,9 @@
       }
     }
   </style>
-</head>
+@endslot
 
-<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
-
-  <!-- HEADER -->
-  <header class="bg-white shadow sticky top-0 z-20">
-    <div class="max-w-7xl mx-auto flex items-center justify-between p-4 px-6">
-      <h1 class="text-lg sm:text-2xl font-bold text-gray-800">
-        <a href="/" class="hover:text-blue-600 transition">Mileq Store</a>
-      </h1>
-
-      <nav>
-        <a 
-          href="/login" 
-          class="text-blue-600 font-semibold hover:text-blue-800 transition text-sm sm:text-base"
-        >
-          Espace Admin
-        </a>
-      </nav>
-    </div>
-  </header>
-
+@slot('main')
   <!-- HERO SECTION -->
   <section class="px-4 mt-6 sm:mt-8">
     <div class="max-w-4xl mx-auto text-center">
@@ -69,76 +43,8 @@
         <!-- Grille responsive -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           @each(product in products)
-            <article class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden flex flex-col h-full border border-gray-100">
-              
-              <!-- MEDIA CONTAINER -->
-              <div class="relative pt-[75%] sm:pt-[65%] bg-gray-50 overflow-hidden">
-                @if(product.mainMediaUrl)
-                  @if(product.mainMediaType === 'video')
-                    <video 
-                      src="{{ product.mainMediaUrl }}" 
-                      alt="{{ product.name }}"
-                      class="absolute inset-0 w-full h-full object-cover"
-                      preload="metadata"
-                      controls
-                    ></video>
-                  @else
-                    <img 
-                      src="{{ product.mainMediaUrl }}" 
-                      alt="{{ product.name }}" 
-                      class="absolute inset-0 w-full h-full object-cover"
-                      loading="lazy"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    >
-                  @endif
-                @else
-                  <div class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                    <span class="text-gray-400 text-sm">Pas de média</span>
-                  </div>
-                @endif
-                
-                <!-- Badge Nouveau (optionnel) -->
-                <div class="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
-                  Nouveau
-                </div>
-              </div>
+         @!component('components/ProductCard', { product: product, isAdmin: adminLoggedIn })
 
-              <!-- CONTENU -->
-              <div class="p-4 sm:p-5 flex-grow flex flex-col">
-                <!-- Nom et description -->
-                <h2 class="text-base sm:text-lg font-semibold mb-2 text-gray-800 line-clamp-1">
-                  {{ product.name }}
-                </h2>
-                
-                <p class="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 flex-grow line-clamp-2">
-                  {{ product.description }}
-                </p>
-
-                <!-- Prix -->
-                <div class="mb-4 sm:mb-5">
-                  @if(product.price)
-                    <div class="flex items-center gap-2">
-                      <span class="text-lg sm:text-xl font-bold text-blue-600">
-                        {{ product.price.toFixed(2) }}$ CAD
-                      </span>
-                    </div>
-                  @else
-                    <span class="text-gray-500 italic text-sm">
-                      Prix sur demande
-                    </span>
-                  @endif
-                </div>
-
-                <!-- Bouton CTA -->
-                <a 
-                  href="#"
-                  class="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-2 sm:py-3 rounded-lg transition-colors duration-300 font-medium text-sm sm:text-base"
-                  onclick="event.preventDefault(); alert('Page détail à implémenter')"
-                >
-                  Voir le produit
-                </a>
-              </div>
-            </article>
           @endeach
         </div>
       </div>
@@ -165,33 +71,11 @@
       </div>
     @endif
   </main>
+@endslot
 
-  <!-- FOOTER -->
-  <footer class="mt-8 sm:mt-12 bg-white border-t py-6">
-    <div class="max-w-7xl mx-auto px-4">
-      <div class="text-center text-gray-500">
-        <p class="text-sm sm:text-base">&copy; {{ new Date().getFullYear() }} — Mileq Store.</p>
-        <p class="text-xs sm:text-sm mt-1 text-gray-400">Tous les prix sont en dollars canadiens (CAD)</p>
-        
-        <!-- Contact info -->
-        <div class="mt-4 flex flex-col sm:flex-row justify-center gap-4 text-xs sm:text-sm">
-          <a href="mailto:contact@mileqstore.com" class="text-gray-400 hover:text-blue-600">
-            contact@mileqstore.com
-          </a>
-          <span class="hidden sm:inline text-gray-300">•</span>
-          <a href="tel:+1234567890" class="text-gray-400 hover:text-blue-600">
-            +1 (234) 567-890
-          </a>
-        </div>
-      </div>
-    </div>
-  </footer>
-
-  <!-- Script pour améliorer l'UX -->
+@slot('scripts')
   <script>
-    // Amélioration de l'expérience mobile
     document.addEventListener('DOMContentLoaded', function() {
-      // Désactiver les contrôles vidéo sur mobile pour éviter le plein écran
       if (window.innerWidth < 640) {
         document.querySelectorAll('video').forEach(video => {
           video.removeAttribute('controls')
@@ -200,19 +84,7 @@
           })
         })
       }
-      
-      // Smooth scroll pour les ancres
-      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-          e.preventDefault()
-          const target = document.querySelector(this.getAttribute('href'))
-          if (target) {
-            target.scrollIntoView({ behavior: 'smooth' })
-          }
-        })
-      })
     })
   </script>
-
-</body>
-</html>
+@endslot
+@end

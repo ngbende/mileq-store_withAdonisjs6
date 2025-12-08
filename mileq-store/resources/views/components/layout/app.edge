@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>{{ title || "Mileq Store" }}</title>
+  
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  @if ($slots.meta)
+    {{{ await $slots.meta() }}}
+  @endif
+  
+  @if ($slots.styles)
+    {{{ await $slots.styles() }}}
+  @endif
+</head>
+
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
+  <!-- HEADER -->
+  <header class="bg-white shadow sticky top-0 z-20">
+    <div class="max-w-7xl mx-auto flex items-center justify-between p-4 px-6">
+      <h1 class="text-lg sm:text-2xl font-bold text-gray-800">
+        <a href="/" class="hover:text-blue-600 transition">Mileq Store</a>
+      </h1>
+
+      <nav>
+        <a 
+          href="/login" 
+          class="text-blue-600 font-semibold hover:text-blue-800 transition text-sm sm:text-base"
+        >
+          Espace Admin
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT SLOT -->
+  {{{ await $slots.main() }}}
+
+  <!-- FOOTER -->
+  <footer class="mt-auto bg-white border-t py-6">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="text-center text-gray-500">
+        <p class="text-sm sm:text-base">&copy; {{ new Date().getFullYear() }} — Mileq Store.</p>
+        <p class="text-xs sm:text-sm mt-1 text-gray-400">Tous les prix sont en dollars canadiens (CAD)</p>
+        
+        <div class="mt-4 flex flex-col sm:flex-row justify-center gap-4 text-xs sm:text-sm">
+          <a href="mailto:contact@mileqstore.com" class="text-gray-400 hover:text-blue-600">
+            contact@mileqstore.com
+          </a>
+          <span class="hidden sm:inline text-gray-300">•</span>
+          <a href="tel:+1234567890" class="text-gray-400 hover:text-blue-600">
+            +1 (234) 567-890
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  @if ($slots.scripts)
+    {{{ await $slots.scripts() }}}
+  @endif
+</body>
+</html>
