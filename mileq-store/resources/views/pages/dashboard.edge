@@ -13,8 +13,13 @@
     <h1 class="text-lg sm:text-2xl font-bold">Dashboard Admin</h1>
     <div class="flex items-center gap-4">
       <span class="text-gray-600 hidden sm:inline">Admin connecté</span>
-      <a href="/admin/logout" class="text-red-600 font-semibold hover:text-red-800 transition">Déconnexion</a>
-      <button id="mobileMenuBtn" class="md:hidden text-gray-700 ml-2">
+   <!-- BOUTON DÉCONNEXION -->
+      <button type="button" onclick="openLogoutModal()" class="text-red-600 font-semibold hover:text-red-800 transition">
+  Déconnexion
+</button>
+    
+
+          <button id="mobileMenuBtn" class="md:hidden text-gray-700 ml-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
              viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round"
@@ -173,6 +178,7 @@
 
     </div>
   </div>
+   @!component('components/confirm_modal')
 
   <script>
     // Drawer Mobile

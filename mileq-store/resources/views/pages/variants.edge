@@ -28,17 +28,18 @@
   </nav>
 
   <!-- En-tête produit -->
-  <section class="mb-8 px-4 sm:px-0">
-    <h1 class="text-2xl sm:text-4xl font-bold mb-4">
-      Tous les modèles de {{ product.name }}
-    </h1>
+<section class="mb-8 px-4 sm:px-0">
+  <h1 class="text-2xl sm:text-4xl font-bold mb-4">
+    Tous les modèles de {{ product.name }}
+  </h1>
 
-    <!-- Image ou vidéo du produit phare -->
-    <div class="relative aspect-video rounded-md overflow-hidden mb-4">
+  <!-- Image ou vidéo du produit phare - TAILLE OPTIMISÉE -->
+  <div class="mb-6">
+    <div class="max-w-2xl mx-auto bg-gray-50 rounded-lg overflow-hidden shadow-sm">
       @if(product.mainMediaType === 'video')
         <video 
           src="{{ product.mainMediaUrl }}" 
-          class="absolute inset-0 w-full h-full object-cover" 
+          class="w-full h-auto max-h-[400px] object-contain"
           preload="metadata" 
           controls
         ></video>
@@ -46,13 +47,15 @@
         <img 
           src="{{ product.mainMediaUrl }}" 
           alt="{{ product.name }}" 
-          class="absolute inset-0 w-full h-full object-cover"
+          class="w-full h-auto max-h-[400px] object-contain mx-auto"
+          loading="lazy"
         >
       @endif
     </div>
+  </div>
 
-    <p class="text-gray-600">{{ variants.length }} modèle(s) disponible(s)</p>
-  </section>
+  <p class="text-gray-600 text-center">{{ variants.length }} modèle(s) disponible(s)</p>
+</section>
 
   <!-- Grille variantes -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 px-4 sm:px-0">

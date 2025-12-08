@@ -12,9 +12,10 @@ import LoginAdminsController from '#controllers/login_admins_controller'
  import { middleware } from '#start/kernel'
 import CrudProductsController from '#controllers/crud_products_controller'
 import HomeController from '#controllers/home_controller'
+import DisconnectsController from '#controllers/disconnects_controller'
 router.get('/', [HomeController, 'index']).as('home')
 
-router.get('/login', [LoginAdminsController,'showLoginForm'])
+router.get('/login', [LoginAdminsController,'showLoginForm']).as('loginAdminForm')
 router.post('/admin/login', [LoginAdminsController, 'login']).as('admin.login')
 
 // ✅ Page publique d'accueil
@@ -65,3 +66,6 @@ router.get(
 router.post('/admin/variants/:variantId/delete', [CrudProductsController, 'deleteVariant'])
   .as('variants.destroy')
   .use(middleware.auth())
+
+//   route de deconnexion
+router.post('/admin/logout', [DisconnectsController, 'disconnect']).as('admin.logout').use(middleware.auth())
