@@ -1,23 +1,30 @@
 import Hash from '@adonisjs/core/services/hash'
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
 import Admin from '#models/admin'
+import env from '#start/env'
+
 export default class extends BaseSeeder {
   async run() {
     // Write your database queries inside the run method
-      await Admin.query().delete()
+      const exists = await Admin.first()
+if (exists) {
+  console.log('Admins déjà présents, seed ignoré')
+  return
+}
+
 
     // Liste des admins à créer
     const admins = [
-      {
-         name: 'Joyce Ngbende',
-        email: 'ngbendej@gmail.com',
-        password: 'bj1465',
-      },
-      {
-        name: 'Dounia Mang',
-        email: 'douniamang@hotmail.com',
-        password: 'Dounia@7929',
-      },
+    {
+    name: env.get('ADMIN_NAME')!,
+    email: env.get('ADMIN_EMAIL')!,
+    password: env.get('ADMIN_PASSWORD')!,
+  },
+  {
+    name: env.get('ADMIN_NAME1')!,
+    email: env.get('ADMIN_EMAIL1')!,
+    password: env.get('ADMIN_PASSWORD1')!,
+  },
     ]
 
     for (const admin of admins) {
