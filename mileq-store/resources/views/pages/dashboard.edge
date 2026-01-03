@@ -34,17 +34,40 @@
     <!-- SIDEBAR Desktop -->
     <aside class="bg-white shadow p-4 w-64 hidden md:block flex-shrink-0">
       <h2 class="text-lg font-semibold mb-4">Interactions importantes</h2>
-      
-      <form id="contactForm" class="space-y-4 mb-6">
+      @if(session.has('success'))
+  <div class="bg-green-100 text-green-700 p-2 rounded mb-4">
+    {{ session.get('success') }}
+  </div>
+@endif
+
+@if(session.has('error'))
+  <div class="bg-red-100 text-red-700 p-2 rounded mb-4">
+    {{ session.get('error') }}
+  </div>
+@endif
+
+      <form id="contactForm" action="{{ route('watsappSettings.update') }}" method="POST"  class="space-y-4 mb-6">
+        {{ csrfField() }}
         <div>
           <label class="block font-medium text-gray-700">WhatsApp</label>
-          <input type="text" name="whatsapp" placeholder="+243 123 456 789"
-                 class="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"/>
+  <input
+      type="tel"
+      name="whatsapp"
+      value="{{ settings ? settings.whatsapp : '' }}"
+      placeholder="+243 pour RD Congo, +33 etc..."
+      pattern="^\+\d{6,15}$"
+      title="Veuillez entrer le numéro complet avec + et code pays, ex: +243...."
+      class="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+      required
+    />
         </div>
         <div>
           <label class="block font-medium text-gray-700">Email</label>
-          <input type="email" name="email" placeholder="support@example.com"
-                 class="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"/>
+<input
+  name="email"
+  value="{{ settings ? settings.email : '' }}"
+  class="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+/>
         </div>
         <button type="submit" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition">
           Mettre à jour
@@ -84,7 +107,7 @@
         <h2 class="text-2xl font-bold mb-6">Ajouter un nouveau produit</h2>
         <form id="postForm" action="{{ route('products.store') }}" class="bg-white p-6 rounded-xl shadow max-w-2xl mx-auto space-y-4" enctype="multipart/form-data" method="POST" >
           {{ csrfField() }}
-          <div>
+          <div> 
             <label class="block text-gray-700 font-medium mb-1" for="name">Nom du produit</label>
             <input type="text" id="name" name="name" placeholder="Ex: T-shirt Blanc"
                    class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"/>

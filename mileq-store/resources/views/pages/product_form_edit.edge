@@ -12,7 +12,8 @@
   <header class="bg-white shadow p-4 flex justify-between items-center sticky top-0 z-20">
     <h1 class="text-lg sm:text-2xl font-bold">Dashboard Admin</h1>
     <div class="flex items-center gap-4">
-   <button type="button" onclick="openLogoutModal()" class="text-red-600 font-semibold hover:text-red-800 transition">
+      <!-- BOUTON DÉCONNEXION -->
+      <button type="button" onclick="openLogoutModal()" class="text-red-600 font-semibold hover:text-red-800 transition">
   Déconnexion
 </button>
     
@@ -160,7 +161,7 @@
       </div>
     </main>
   </div>
-     @component('components/confirm_modal') 
+     @!component('components/confirm_modal') 
 
 <!-- Script Preview Média -->
 <script>

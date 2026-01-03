@@ -17,6 +17,26 @@
     
     <!-- Spécificités variante -->
     <div class="space-y-2 text-sm text-gray-600 mb-3 sm:mb-4 flex-grow">
+      <!-- Média de la variante -->
+@if(variant.mediaUrl)
+  <div class="w-full bg-gray-100 overflow-hidden aspect-video">
+    @if(variant.mediaType === 'image')
+      <img
+        src="{{ variant.mediaUrl }}"
+        alt="{{ product.name }}"
+        class="w-full h-full object-cover"
+        loading="lazy"
+      >
+    @elseif(variant.mediaType === 'video')
+      <video
+        src="{{ variant.mediaUrl }}"
+        class="w-full h-full object-cover"
+        preload="metadata"
+        muted
+      ></video>
+    @endif
+  </div>
+@endif
       @if(variant.color && variant.color !== '' && variant.color !== 'null')
         <div class="flex items-center">
           <span class="w-3 h-3 rounded-full mr-2 border" 
@@ -50,13 +70,20 @@
     </div>
 
     <!-- Bouton WhatsApp Principal -->
-    <a 
-      href="https://wa.me/NUMERO_TELEPHONE?text=Bonjour,%20je%20veux%20commander%20{{ product.name }}{% if variant.otherAttr && variant.otherAttr !== '' && variant.otherAttr !== 'null' %} - {{ variant.otherAttr }}{% endif %}{% if variant.color && variant.color !== '' && variant.color !== 'null' %} (Couleur: {{ variant.color }}){% endif %}{% if variant.size && variant.size !== '' && variant.size !== 'null' %} - Taille: {{ variant.size }}{% endif %}" 
-      target="_blank"
-      class="block w-full bg-green-600 hover:bg-green-700 text-white text-center py-2 sm:py-3 rounded-lg transition-colors duration-300 font-medium text-sm sm:text-base mb-3"
-    >
-      Commander via WhatsApp
-    </a>
+   @if(!isAdmin)
+  @if(!isAdmin && settings?.whatsapp)
+ <a
+  href="https://wa.me/{{ settings.whatsapp }}?text=Bonjour%20je%20souhaite%20commander%3A%0A%0A{{ product.name | url_encode }}{{ variant.otherAttr ? '%0AModele%3A%20' + (variant.otherAttr | url_encode) : '' }}{{ variant.color ? '%0ACouleur%3A%20' + (variant.color | url_encode) : '' }}{{ variant.size ? '%0ATaille%3A%20' + (variant.size | url_encode) : '' }}{{ variant.price ? '%0APrix%3A%20' + variant.price + '%24' : '' }}%0A%0ALien%20produit%3A%20{{ route('product.variants', [product.id]) | url_encode }}"
+  target="_blank"
+  class="block w-full bg-green-600 hover:bg-green-700 text-white text-center py-2 rounded-lg"
+>
+  Commander via WhatsApp
+</a>
+@endif
+
+
+@endif
+    <!-- Boutons admin -->
 
     {{-- Actions admin --}}
     @if(isAdmin)

@@ -13,6 +13,9 @@ import LoginAdminsController from '#controllers/login_admins_controller'
 import CrudProductsController from '#controllers/crud_products_controller'
 import HomeController from '#controllers/home_controller'
 import DisconnectsController from '#controllers/disconnects_controller'
+import udapteContactAdmin from '#controllers/watsapp_settings_controller'
+import Setting from '#models/site_setting'
+
 router.get('/', [HomeController, 'index']).as('home')
 
 router.get('/login', [LoginAdminsController,'showLoginForm']).as('loginAdminForm')
@@ -20,7 +23,12 @@ router.post('/admin/login', [LoginAdminsController, 'login']).as('admin.login')
 
 // ✅ Page publique d'accueil
 router.get('/dashboard', async ({ view }) => {
-  return view.render('pages/dashboard')
+let siteSetting = await Setting.first()
+if (!siteSetting) {
+  siteSetting = await Setting.create({ whatsapp: null, email: null })
+}  return view.render('pages/dashboard', {
+    settings: siteSetting,
+  })
 }).as('dashboard').use(middleware.auth())
 
 router.post('/admin/products', [CrudProductsController, 'store']).as('products.store').use(middleware.auth())
@@ -69,3 +77,5 @@ router.post('/admin/variants/:variantId/delete', [CrudProductsController, 'delet
 
 //   route de deconnexion
 router.post('/admin/logout', [DisconnectsController, 'disconnect']).as('admin.logout').use(middleware.auth())
+// route pour la mise a jour des contacts watsapp admins 
+router.post('/admin/watsapp_settings/update', [udapteContactAdmin, 'udapteContactAdmin']).as('watsappSettings.update').use(middleware.auth())

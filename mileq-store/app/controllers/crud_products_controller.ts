@@ -7,11 +7,12 @@ import { productFormValidator } from '#validators/product'
 import { productVariantsValidator } from '#validators/product'
 import { editProductValidator } from '#validators/product'
 import { editVariantValidator } from '#validators/product'
-
+import Setting from '#models/site_setting'
 
 // import { Application } from '@adonisjs/core/app'
 import { cuid } from '@adonisjs/core/helpers'
 import app from '@adonisjs/core/services/app'
+import SiteSetting from '#models/site_setting'
 
 export default class CrudProductsController {
     public async create({ view }: HttpContext) {
@@ -163,7 +164,13 @@ try {
   const variants = await ProductVariant.query()
     .where('productId', params.id)
     .orderBy('price', 'asc')
+   // Récupérer le setting correct
+  let siteSetting = await Setting.query().orderBy('id', 'desc').first()
   
+  if (!siteSetting) {
+    siteSetting = await Setting.create({ whatsapp: null, email: null })
+  }
+
   console.log('🔍 DEBUG variants:', {
     productId: params.id,
     product: product.toJSON(),
@@ -174,7 +181,8 @@ try {
   // Vérifie que les données sont correctes
   return view.render('pages/variants', {
     product: product.toJSON(),       // CONVERTIR EN JSON
-    variants: variants.map(v => v.toJSON())  // CONVERTIR EN JSON
+    variants: variants.map(v => v.toJSON()),  // CONVERTIR EN JSON,
+     settings: siteSetting.toJSON() 
   })
 }
 

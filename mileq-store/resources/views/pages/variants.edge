@@ -60,12 +60,15 @@
   <!-- Grille variantes -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 px-4 sm:px-0">
     @each(variant in variants)
-      @!component('components/variant_card', { product: product, variant: variant })
+      @!component('components/variant_card', { product: product, variant: variant,   settings: settings })
     @endeach
   </div>
 
   <!-- Retour au produit -->
   <div class="mt-8 pt-6 border-t px-4 sm:px-0">
+    {{-- Testez ceci dans votre vue --}}
+
+<p>WhatsApp: {{ settings?.whatsapp }}</p>
     <a href="/" class="text-blue-600 hover:underline">
       ← Retour aux produits phares
     </a>
