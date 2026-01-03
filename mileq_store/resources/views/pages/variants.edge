@@ -1,0 +1,92 @@
+@layout.app({ title: 'Variantes de ' + product.name + ' — Mileq Store' })
+
+@slot('meta')
+  <meta name="description" content="Découvrez tous les modèles de {{ product.name }}">
+@endslot
+
+@slot('styles')
+  <style>
+    .aspect-video {
+      aspect-ratio: 16 / 9;
+    }
+    @media (min-width: 640px) {
+      .aspect-video {
+        aspect-ratio: 4 / 3;
+      }
+    }
+  </style>
+@endslot
+
+@slot('main')
+  <!-- Breadcrumb -->
+  <nav class="mb-6 text-sm text-gray-600 px-4 sm:px-0">
+    <a href="/" class="text-blue-600 hover:underline">Accueil</a>
+    <span class="mx-2">/</span>
+    <a href="/" class="text-blue-600 hover:underline">Produits phares</a>
+    <span class="mx-2">/</span>
+    <span class="text-gray-500">{{ product.name }}</span>
+  </nav>
+
+  <!-- En-tête produit -->
+<section class="mb-8 px-4 sm:px-0">
+  <h1 class="text-2xl sm:text-4xl font-bold mb-4">
+    Tous les modèles de {{ product.name }}
+  </h1>
+
+  <!-- Image ou vidéo du produit phare - TAILLE OPTIMISÉE -->
+  <div class="mb-6">
+    <div class="max-w-2xl mx-auto bg-gray-50 rounded-lg overflow-hidden shadow-sm">
+      @if(product.mainMediaType === 'video')
+        <video 
+          src="{{ product.mainMediaUrl }}" 
+          class="w-full h-auto max-h-[400px] object-contain"
+          preload="metadata" 
+          controls
+        ></video>
+      @elseif(product.mainMediaType === 'image')
+        <img 
+          src="{{ product.mainMediaUrl }}" 
+          alt="{{ product.name }}" 
+          class="w-full h-auto max-h-[400px] object-contain mx-auto"
+          loading="lazy"
+        >
+      @endif
+    </div>
+  </div>
+
+  <p class="text-gray-600 text-center">{{ variants.length }} modèle(s) disponible(s)</p>
+</section>
+
+  <!-- Grille variantes -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 px-4 sm:px-0">
+    @each(variant in variants)
+      @!component('components/variant_card', { product: product, variant: variant,   settings: settings })
+    @endeach
+  </div>
+
+  <!-- Retour au produit -->
+  <div class="mt-8 pt-6 border-t px-4 sm:px-0">
+    {{-- Testez ceci dans votre vue --}}
+
+<p>WhatsApp: {{ settings?.whatsapp }}</p>
+    <a href="/" class="text-blue-600 hover:underline">
+      ← Retour aux produits phares
+    </a>
+  </div>
+@endslot
+
+@slot('scripts')
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.innerWidth < 640) {
+        document.querySelectorAll('video').forEach(video => {
+          video.removeAttribute('controls')
+          video.addEventListener('click', function() {
+            this.paused ? this.play() : this.pause()
+          })
+        })
+      }
+    })
+  </script>
+@endslot
+@end
