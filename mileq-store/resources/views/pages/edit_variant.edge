@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modifier Variante - {{ product.name }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen">
+
+  <div class="max-w-2xl mx-auto p-4">
+    <!-- Header -->
+    <div class="mb-6">
+      <a href="{{ route('product.variants', { id: product.id }) }}" 
+         class="text-blue-600 hover:text-blue-800 text-sm">
+        ← Retour aux variantes
+      </a>
+      <h1 class="text-2xl font-bold mt-2">Modifier la variante</h1>
+      <p class="text-gray-600">{{ product.name }}</p>
+    </div>
+
+    <!-- Messages Flash -->
+    @if(flashMessages.has('success'))
+      <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+        {{ flashMessages.get('success') }}
+      </div>
+    @endif
+
+    @if(flashMessages.has('error'))
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        {{ flashMessages.get('error') }}
+      </div>
+    @endif
+
+    <!-- Formulaire -->
+    <div class="bg-white rounded-xl shadow p-6">
+      <form action="{{ route('variants.update', { variantId: variant.id }) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+        {{ csrfField() }}
+        
+        <!-- Produit parent (info) -->
+        <div class="mb-4">
+          <label class="block text-gray-700 font-medium mb-1">Produit parent</label>
+          <div class="border border-gray-200 rounded p-3 bg-gray-50">
+            <p class="font-semibold">{{ product.name }}</p>
+            <p class="text-sm text-gray-600">ID: {{ product.id }}</p>
+          </div>
+        </div>
+
+        <!-- Champs variante -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-gray-700 font-medium mb-1">Couleur</label>
+            <input type="text" name="color" value="{{ variant.color }}" 
+                   placeholder="Ex: Rouge, Noir, Blanc"
+                   class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+
+          <div>
+            <label class="block text-gray-700 font-medium mb-1">Taille</label>
+            <input type="text" name="size" value="{{ variant.size }}" 
+                   placeholder="Ex: S, M, L, XL"
+                   class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block text-gray-700 font-medium mb-1">Détails (Modèle/Marque/Matériau)</label>
+            <input type="text" name="otherAttr" value="{{ variant.otherAttr }}" 
+                   placeholder="Ex: iPhone 14 Pro Max, Nike Air Max, Coton 100%"
+                   class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+
+          <div>
+            <label class="block text-gray-700 font-medium mb-1">Prix ($)</label>
+            <input type="text" name="price" value="{{ variant.price }}" 
+                   placeholder="Ex: 10$ ou 1999"
+                   class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+
+          <div>
+            <label class="block text-gray-700 font-medium mb-1">Stock</label>
+            <input type="number" name="stock" value="{{ variant.stock }}" 
+                   placeholder="Ex: 100"
+                   min="0"
+                   class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+        </div>
+
+        <!-- Média -->
+        <div>
+          <label class="block text-gray-700 font-medium mb-1">Image/Vidéo de la variante</label>
+          <input type="file" name="media_url" accept="image/*,video/*" 
+                 class="w-full text-gray-600">
+          
+          <!-- Aperçu média existant -->
+          @if(variant.mediaUrl)
+            <div class="mt-3">
+              <p class="text-gray-500 text-sm mb-1">Média actuel:</p>
+              <div class="border border-gray-200 rounded p-2">
+                @if(variant.mediaType === 'video')
+                  <video src="{{ variant.mediaUrl }}" controls class="max-h-40"></video>
+                @else
+                  <img src="{{ variant.mediaUrl }}" class="max-h-40 object-contain">
+                @endif
+              </div>
+              <p class="text-xs text-gray-500 mt-1">{{ variant.mediaUrl }}</p>
+            </div>
+          @endif
+        </div>
+
+        <!-- Boutons -->
+        <div class="flex gap-3 pt-4">
+          <a href="{{ route('product.variants', { id: product.id }) }}" 
+             class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded transition-colors">
+            Annuler
+          </a>
+          <button type="submit" 
+                  class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded transition-colors flex-1">
+            Enregistrer les modifications
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</body>
+</html>

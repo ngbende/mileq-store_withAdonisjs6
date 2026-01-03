@@ -12,13 +12,13 @@ export default class Product extends BaseModel {
   declare description: string
 
   @column()
-  declare mainMediaUrl: string  // peut être image ou vidéo
+  declare mainMediaUrl: string | null  // peut être image ou vidéo
 
   @column()
-  declare price?: number  // prix du produit phare si applicable
+  declare price?: number | null  // prix du produit phare si applicable
 
   @column()
-  declare mainMediaType?: 'image' | 'video'  // type du média
+  declare mainMediaType?: 'image' | 'video' | null  // type du média
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
