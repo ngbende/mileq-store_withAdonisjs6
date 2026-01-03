@@ -1,5 +1,4 @@
 // app/services/LogoutService.ts
-import { ApplicationService } from '@adonisjs/core/types'
 // app/services/logout_service.ts
 export default class LogoutService {
   /**
