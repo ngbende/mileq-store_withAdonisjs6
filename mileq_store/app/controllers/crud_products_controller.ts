@@ -12,7 +12,7 @@ import Setting from '#models/site_setting'
 // import { Application } from '@adonisjs/core/app'
 import { cuid } from '@adonisjs/core/helpers'
 import app from '@adonisjs/core/services/app'
-import SiteSetting from '#models/site_setting'
+
 
 export default class CrudProductsController {
     public async create({ view }: HttpContext) {
@@ -199,7 +199,7 @@ try {
 
     return response.redirect().back()
   }   
- public async showEditProductForm({ params, view, response }: HttpContext) {
+ public async showEditProductForm({ params, view }: HttpContext) {
     try {
       const product = await Product.findOrFail(params.id)
       const variants = await ProductVariant.query()
