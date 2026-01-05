@@ -128,7 +128,7 @@ try {
 
       
       // 4️⃣ Réponse
-      return response.status(201).json({
+      return response.redirect().toRoute('dashboard', {
         success: true,
         message: 'Produit créé avec succès',
         data: product.toJSON()
