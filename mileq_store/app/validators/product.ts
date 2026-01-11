@@ -1,5 +1,15 @@
 import vine from '@vinejs/vine'
 // validators/product.js
+import { SimpleMessagesProvider } from '@vinejs/vine'
+import { frenchValidationMessages, frenchFieldNames } from './messages/fr.js'  // Corrigez ce chemin
+
+// ================================
+// CONFIGURATION DES MESSAGES FRANÇAIS
+// ================================
+vine.messagesProvider = new SimpleMessagesProvider(
+  frenchValidationMessages,
+  frenchFieldNames
+)
 
 // Utilisez une fonction de transformation séparée pour réutilisabilité
 // Correction : accepte string | null | undefined
@@ -11,6 +21,11 @@ const parsePrice = (value: string | null | undefined): number | null => {
   if (cleaned === '') return null
   
   const number = parseFloat(cleaned)
+  return isNaN(number) ? null : number
+}
+const parseStock = (value: string | null | undefined): number | null => {
+  if (!value || value.trim() === '') return null
+  const number = parseInt(value)
   return isNaN(number) ? null : number
 }
 
@@ -42,46 +57,30 @@ export const productFormValidator = vine.compile(
       .file({
         extnames: ['jpg', 'jpeg', 'png', 'gif', 'mp4', 'mov', 'avi'],
         size: '10mb',
-      })
-      .optional(),
+      }),
   })
 )
 
 // Exportez aussi la fonction parsePrice pour la réutiliser ailleurs
-export { parsePrice }
+export { parsePrice,parseStock }
 export const productVariantsValidator = vine.compile(
   vine.object({
-    variants: vine
-      .array(
-        vine.object({
-          color: vine.string().trim().optional(),
-          size: vine.string().trim().optional(),
-            otherAttr: vine.string().trim().optional(),
-
-          price: vine.string().optional().transform((value) => {
-            if (!value) return null
-            const cleaned = value.replace(/[^\d.,]/g, '').replace(',', '.')
-            const number = parseFloat(cleaned)
-            return isNaN(number) ? null : number
-          }),
-
-          stock: vine.string().optional().transform((value) => {
-            if (!value) return null
-            const number = parseInt(value)
-            return isNaN(number) ? null : number
-          }),
-
-          media_url: vine.file({
+    variants: vine.array(
+      vine.object({
+        color: vine.string().trim().maxLength(50).optional(),
+        size: vine.string().trim().maxLength(20).optional(),
+        otherAttr: vine.string().trim().maxLength(100),
+        price: vine.string().optional().transform(parsePrice),
+        stock: vine.string().optional().transform(parseStock),
+        media_url: vine
+          .file({
             extnames: ['jpg', 'jpeg', 'png', 'gif', 'mp4'],
             size: '10mb',
-          }).optional(),
-        }).optional() // 🔥 Permet des objets vides
-      )
-      .optional()     // 🔥 Permet zéro variante
-      .nullable(),    // 🔥 Permet même absence complète
+          }),
+      })
+    ).optional()
   })
 )
-
 
 // Validator pour l'édition d'un produit - tous les champs optionnels
 export const editProductValidator = vine.compile(

@@ -5,9 +5,101 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard Admin</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- AJOUT DÉBUT: Style pour animations flash messages -->
+  <style>
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    .animate-slideIn {
+      animation: slideIn 0.3s ease-out;
+    }
+    
+    .flash-message-auto-hide {
+      animation: slideIn 0.3s ease-out, fadeOut 0.5s ease-in 4.5s forwards;
+    }
+    
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+  </style>
 </head>
 <body class="bg-blue-50 bg-blur text-gray-800 flex flex-col min-h-screen">
+ <!-- AJOUT DÉBUT: Section Flash Messages (TOUJOURS EN HAUT) -->
+ <div class="fixed top-4 right-4 z-50 space-y-2 w-96">
+  {{-- AJOUT: Messages de succès --}}
+  @if(flashMessages.has('success'))
+    <div class="bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg animate-slideIn">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+          <span class="font-medium">{{ flashMessages.get('success') }}</span>
+        </div>
+        <button onclick="this.parentElement.parentElement.remove()" class="text-white hover:text-gray-200">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  @endif
+  {{-- AJOUT: Messages d'erreur --}}
+  @if(flashMessages.has('error'))
+    <div class="bg-red-500 text-white px-6 py-4 rounded-lg shadow-lg animate-slideIn">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+          </svg>
+          <span class="font-medium">{{ flashMessages.get('error') }}</span>
+        </div>
+        <button onclick="this.parentElement.parentElement.remove()" class="text-white hover:text-gray-200">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  @endif
 
+  {{-- AJOUT: Messages d'erreurs de validation --}}
+  @if(flashMessages.has('errors'))
+    <div class="bg-red-500 text-white px-6 py-4 rounded-lg shadow-lg animate-slideIn">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+          </svg>
+          <span class="font-medium">Erreurs de validation</span>
+        </div>
+        <button onclick="this.parentElement.parentElement.remove()" class="text-white hover:text-gray-200">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+          </svg>
+        </button>
+      </div>
+      <ul class="mt-2 text-sm list-disc list-inside">
+        @each(error in flashMessages.get('errors'))
+          <li>{{ error.message }}</li>
+        @endeach
+      </ul>
+    </div>
+  @endif
+</div>
+</div>
+
+<!-- AJOUT FIN: Section Flash Messages -->
+  <!-- AJOUT FIN: Section Flash Messages -->
   <!-- HEADER -->
   <header class="bg-white shadow p-4 flex justify-between items-center sticky top-0 z-20">
     <h1 class="text-lg sm:text-2xl font-bold">Dashboard Admin</h1>
@@ -34,18 +126,7 @@
     <!-- SIDEBAR Desktop -->
     <aside class="bg-white shadow p-4 w-64 hidden md:block flex-shrink-0">
       <h2 class="text-lg font-semibold mb-4">Interactions importantes</h2>
-      @if(session.has('success'))
-  <div class="bg-green-100 text-green-700 p-2 rounded mb-4">
-    {{ session.get('success') }}
-  </div>
-@endif
-
-@if(session.has('error'))
-  <div class="bg-red-100 text-red-700 p-2 rounded mb-4">
-    {{ session.get('error') }}
-  </div>
-@endif
-
+     
       <form id="contactForm" action="{{ route('watsappSettings.update') }}" method="POST"  class="space-y-4 mb-6">
         {{ csrfField() }}
         <div>
@@ -105,35 +186,90 @@
       <!-- Ajouter Produit -->
       <div id="addProductSection">
         <h2 class="text-2xl font-bold mb-6">Ajouter un nouveau produit</h2>
+          {{-- AJOUT: Affichage des erreurs de validation des variantes --}}
+@if(flashMessages.has('variantErrors'))
+  <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 animate-slideIn top-4* right-4 z-50">
+    <strong class="font-bold">Erreurs dans les variantes :</strong>
+    <ul class="list-disc list-inside mt-2">
+      @each(error in flashMessages.get('variantErrors'))
+        <li>{{ error }}</li>
+      @endeach
+    </ul>
+  </div>
+@endif
         <form id="postForm" action="{{ route('products.store') }}" class="bg-white p-6 rounded-xl shadow max-w-2xl mx-auto space-y-4" enctype="multipart/form-data" method="POST" >
           {{ csrfField() }}
-          <div> 
-            <label class="block text-gray-700 font-medium mb-1" for="name">Nom du produit</label>
-            <input type="text" id="name" name="name" placeholder="Ex: T-shirt Blanc"
-                   class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-          </div>
+        <div> 
+  <label class="block text-gray-700 font-medium mb-1" for="name">Nom du produit</label>
+  <input 
+    type="text" 
+    id="name" 
+    name="name" 
+    placeholder="Ex: T-shirt Blanc (minimum 3 caractères)"  
+    value="{{ old('name', '') }}"
+    class="w-full border {{ flashMessages.has('errors') && flashMessages.get('errors').name ? 'border-red-500' : 'border-gray-300' }} rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+  />
+ @error('name') 
+    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+  @enderror  
+</div>
 
-          <div>
-            <label class="block text-gray-700 font-medium mb-1" for="description">Description</label>
-            <textarea id="description" name="description" placeholder="Décrivez le produit..."
-                      rows="4"
-                      class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-          </div>
+<div>
+  <label class="block text-gray-700 font-medium mb-1" for="description">
+    Description <span class="text-red-500">*</span>
+  </label>
+  <textarea 
+    id="description" 
+    name="description" 
+    placeholder="Décrivez le produit (minimum 10 caractères)..."
+    rows="4"
+    class="w-full border {{ flashMessages.has('errors') && flashMessages.get('errors').description ? 'border-red-500' : 'border-gray-300' }} rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+  >{{ old('description', '') }}</textarea>
+  @error('description')
+    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+  @enderror  
+</div>
 
-          <div>
-            <label class="block text-gray-700 font-medium mb-1" for="price">Prix (optionnel)</label>
-            <input type="text" name="price" placeholder="Ex: 1999 ou 10$" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-          </div>
+<div>
+  <label class="block text-gray-700 font-medium mb-1" for="price">
+    Prix (optionnel)
+  </label>
+  <input 
+    type="text" 
+    id="price"
+    name="price" 
+    value="{{ old('price', '') }}"
+    placeholder="Ex: 1999 ou 10$" 
+    class="w-full border {{ flashMessages.has('errors.price') ? 'border-red-500' : 'border-gray-300' }} rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+  />
+  <p class="text-gray-500 text-sm mt-1">Format accepté : 1999, 19.99, 10$</p>
+  @error('price')  
+    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+  @enderror  
+</div>
 
-          <div>
-            <label class="block text-gray-700 font-medium mb-1">Fichier média principal</label>
-            <input type="file" id="media" name="main_media_url" accept="image/*,video/*" class="w-full text-gray-600"/>
-            <p class="text-gray-500 text-sm mt-1">Image ou vidéo du produit phare</p>
-            <button type="button" id="clearMediaBtn" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition">
-              Annuler
-            </button>
-          </div>
-
+<div>
+  <label class="block text-gray-700 font-medium mb-1">
+    Fichier média principal <span class="text-red-500">*</span>
+  </label>
+  <input 
+    type="file" 
+    id="media" 
+    name="main_media_url" 
+    accept="image/*,video/*" 
+    class="w-full text-gray-600 border {{ flashMessages.has('errors.main_media_url') ? 'border-red-500' : 'border-gray-300' }} p-2 rounded"
+  />
+  <p class="text-gray-500 text-sm mt-1">
+    Formats acceptés : JPG, PNG, GIF, MP4, MOV, AVI (max 10MB)
+  </p>
+   @error('main_media_url')  
+    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+  @enderror 
+  <p class="text-gray-500 text-sm mt-1">Image ou vidéo du produit phare</p>
+  <button type="button" id="clearMediaBtn" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition">
+    Annuler
+  </button>
+</div>
           <div id="preview" class="mt-4 hidden">
             <p class="text-gray-500 text-sm mb-2">Aperçu:</p>
             <div id="mediaPreview" class="border border-gray-300 rounded p-2 flex justify-center items-center min-h-[150px]">
@@ -153,6 +289,7 @@
             Publier
           </button>
         </form>
+      
       </div>
 
       <!-- Tableau Produits Phares -->
@@ -292,39 +429,444 @@
     mediaInput.addEventListener('change', updatePreview)
 
     // Variantes
-    const addVariantBtn = document.getElementById('addVariantBtn')
-    const variantsContainer = document.getElementById('variantsContainer')
-    let variantCount=0
-    addVariantBtn.addEventListener('click', ()=>{
-      variantCount++
-      const variantDiv=document.createElement('div')
-      variantDiv.className='border p-3 rounded space-y-2 bg-gray-50'
-      variantDiv.innerHTML=`
-        <h4 class="font-semibold mb-2">Variante ${variantCount}</h4>
-        <input type="text" name="variants[${variantCount}][color]" placeholder="Couleur" class="w-full border rounded px-2 py-1"/>
-        <input type="text" name="variants[${variantCount}][size]" placeholder="Taille" class="w-full border rounded px-2 py-1"/>
-        <input type="text" name="variants[${variantCount}][otherAttr]" placeholder="Modèle/Marque/Matériau" class="w-full border rounded px-2 py-1"/>
-        <input type="text" name="variants[${variantCount}][price]" placeholder="Prix (ex: 10$)" class="w-full border rounded px-2 py-1"/>
-        <input type="number" name="variants[${variantCount}][stock]" placeholder="Stock" class="w-full border rounded px-2 py-1"/>
-        <label class="block mt-2 text-gray-700 font-medium">Fichier média</label>
-        <input type="file" name="variants[${variantCount}][media_url]" accept="image/*,video/*" class="variantMedia w-full text-gray-600"/>
-        <button type="button" class="clearVariantBtn bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition">Annuler</button>
-        <div class="variantPreview border border-gray-300 rounded p-2 flex justify-center items-center min-h-[100px] text-gray-400">Aucun média sélectionné</div>
-      `
-      variantsContainer.appendChild(variantDiv)
-      const mediaInputV = variantDiv.querySelector('.variantMedia')
-      const mediaPreviewV = variantDiv.querySelector('.variantPreview')
-      const clearBtn = variantDiv.querySelector('.clearVariantBtn')
-      mediaInputV.addEventListener('change', ()=>{
-        const file=mediaInputV.files[0]
-        mediaPreviewV.innerHTML=''
-        if(!file){mediaPreviewV.textContent='Aucun média sélectionné';mediaPreviewV.classList.add('text-gray-400');return}
-        const type=file.type.startsWith('image')?'image':'video'
-        if(type==='image'){const img=document.createElement('img');img.src=URL.createObjectURL(file);img.className='max-h-40 object-contain';mediaPreviewV.appendChild(img)}
-        else{const video=document.createElement('video');video.src=URL.createObjectURL(file);video.controls=true;video.className='max-h-40';mediaPreviewV.appendChild(video)}
-      })
-      clearBtn.addEventListener('click',()=>{mediaInputV.value='';mediaPreviewV.innerHTML='Aucun média sélectionné';mediaPreviewV.classList.add('text-gray-400')})
+    // Variantes
+const addVariantBtn = document.getElementById('addVariantBtn')
+const variantsContainer = document.getElementById('variantsContainer')
+let variantCount = 0
+
+// LIGNE 465 à 550 (environ) - REMPLACEZ TOUT CE QUI SUIT :
+
+addVariantBtn.addEventListener('click', () => {
+  variantCount++
+  const variantDiv = document.createElement('div')
+  variantDiv.className = 'border p-3 rounded space-y-2 bg-gray-50'
+  variantDiv.innerHTML = `
+    <h4 class="font-semibold mb-2">Variante ${variantCount}</h4>
+    
+    <!-- Champ Couleur avec validation -->
+    <div>
+      <input 
+        type="text" 
+        name="variants[${variantCount}][color]" 
+        placeholder="Couleur" 
+        class="variant-color w-full border rounded px-2 py-1"
+      />
+      <div class="variant-error color-error text-red-500 text-sm mt-1 hidden"></div>
+    </div>
+    
+    <!-- Champ Taille avec validation -->
+    <div>
+      <input 
+        type="text" 
+        name="variants[${variantCount}][size]" 
+        placeholder="Taille" 
+        class="variant-size w-full border rounded px-2 py-1"
+      />
+      <div class="variant-error size-error text-red-500 text-sm mt-1 hidden"></div>
+    </div>
+    
+    <!-- Champ Autre attribut AVEC VALIDATION -->
+    <div>
+      <input 
+        type="text" 
+        name="variants[${variantCount}][otherAttr]" 
+        placeholder="Modèle/Marque/Matériau" 
+        class="variant-otherAttr w-full border rounded px-2 py-1"
+      />
+      <div class="variant-error otherAttr-error text-red-500 text-sm mt-1 hidden"></div>
+    </div>
+    
+    <!-- Champ Prix avec validation -->
+    <div>
+      <input 
+        type="text" 
+        name="variants[${variantCount}][price]" 
+        placeholder="Prix (ex: 10$)" 
+        class="variant-price w-full border rounded px-2 py-1"
+      />
+      <div class="variant-error price-error text-red-500 text-sm mt-1 hidden"></div>
+    </div>
+    
+    <!-- Champ Stock avec validation -->
+    <div>
+      <input 
+        type="number" 
+        name="variants[${variantCount}][stock]" 
+        placeholder="Stock" 
+        class="variant-stock w-full border rounded px-2 py-1"
+      />
+      <div class="variant-error stock-error text-red-500 text-sm mt-1 hidden"></div>
+    </div>
+    
+    <!-- Fichier média AVEC VALIDATION -->
+    <div>
+      <label class="block mt-2 text-gray-700 font-medium">Fichier média</label>
+      <input 
+        type="file" 
+        name="variants[${variantCount}][media_url]" 
+        accept="image/*,video/*" 
+        class="variantMedia w-full text-gray-600"
+      />
+      <div class="variant-error media-error text-red-500 text-sm mt-1 hidden"></div>
+    </div>
+    
+    <button type="button" class="clearVariantBtn bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition">
+      Annuler
+    </button>
+    
+    <div class="variantPreview border border-gray-300 rounded p-2 flex justify-center items-center min-h-[100px] text-gray-400">
+      Aucun média sélectionné
+    </div>
+  `
+  
+  variantsContainer.appendChild(variantDiv)
+  
+  // Gestion du média
+  const mediaInputV = variantDiv.querySelector('.variantMedia')
+  const mediaPreviewV = variantDiv.querySelector('.variantPreview')
+  const clearBtn = variantDiv.querySelector('.clearVariantBtn')
+  
+  mediaInputV.addEventListener('change', () => {
+    const file = mediaInputV.files[0]
+    mediaPreviewV.innerHTML = ''
+    
+    // Nettoyer l'erreur quand un fichier est sélectionné
+    const mediaError = variantDiv.querySelector('.media-error')
+    mediaError.textContent = ''
+    mediaError.classList.add('hidden')
+    mediaInputV.classList.remove('border-red-500')
+    
+    if (!file) {
+      mediaPreviewV.textContent = 'Aucun média sélectionné'
+      mediaPreviewV.classList.add('text-gray-400')
+      return
+    }
+    
+    // Validation du fichier en temps réel
+    const isValid = validateMediaFile(file, mediaError, variantCount)
+    if (!isValid) {
+      mediaInputV.value = ''
+      mediaPreviewV.textContent = 'Fichier invalide'
+      mediaPreviewV.classList.add('text-gray-400')
+      return
+    }
+    
+    const type = file.type.startsWith('image') ? 'image' : 'video'
+    if (type === 'image') {
+      const img = document.createElement('img')
+      img.src = URL.createObjectURL(file)
+      img.className = 'max-h-40 object-contain'
+      mediaPreviewV.appendChild(img)
+    } else {
+      const video = document.createElement('video')
+      video.src = URL.createObjectURL(file)
+      video.controls = true
+      video.className = 'max-h-40'
+      mediaPreviewV.appendChild(video)
+    }
+  })
+  
+  clearBtn.addEventListener('click', () => {
+    mediaInputV.value = ''
+    mediaPreviewV.innerHTML = 'Aucun média sélectionné'
+    mediaPreviewV.classList.add('text-gray-400')
+    
+    // Nettoyer l'erreur
+    const mediaError = variantDiv.querySelector('.media-error')
+    mediaError.textContent = ''
+    mediaError.classList.add('hidden')
+    mediaInputV.classList.remove('border-red-500')
+  })
+  
+  // Ajouter la validation en temps réel pour cette variante
+  setupVariantValidation(variantDiv, variantCount)
+})
+
+// Fonction pour configurer la validation d'une variante
+function setupVariantValidation(variantDiv, index) {
+  const colorInput = variantDiv.querySelector('.variant-color')
+  const sizeInput = variantDiv.querySelector('.variant-size')
+  const otherAttrInput = variantDiv.querySelector('.variant-otherAttr') // AJOUT
+  const priceInput = variantDiv.querySelector('.variant-price')
+  const stockInput = variantDiv.querySelector('.variant-stock')
+  const mediaInput = variantDiv.querySelector('.variantMedia') // AJOUT
+  
+  const colorError = variantDiv.querySelector('.color-error')
+  const sizeError = variantDiv.querySelector('.size-error')
+  const otherAttrError = variantDiv.querySelector('.otherAttr-error') // AJOUT
+  const priceError = variantDiv.querySelector('.price-error')
+  const stockError = variantDiv.querySelector('.stock-error')
+  const mediaError = variantDiv.querySelector('.media-error') // AJOUT
+  
+  // Validation en temps réel
+  colorInput.addEventListener('blur', () => validateVariantField(colorInput, colorError, 'color', index))
+  sizeInput.addEventListener('blur', () => validateVariantField(sizeInput, sizeError, 'size', index))
+  otherAttrInput.addEventListener('blur', () => validateVariantField(otherAttrInput, otherAttrError, 'otherAttr', index)) // AJOUT
+  priceInput.addEventListener('blur', () => validateVariantField(priceInput, priceError, 'price', index))
+  stockInput.addEventListener('blur', () => validateVariantField(stockInput, stockError, 'stock', index))
+  
+  // Validation média quand le fichier change
+  mediaInput.addEventListener('change', () => {
+    const file = mediaInput.files[0]
+    if (file) {
+      validateMediaFile(file, mediaError, index)
+    } else {
+      mediaError.textContent = ''
+      mediaError.classList.add('hidden')
+      mediaInput.classList.remove('border-red-500')
+    }
+  })
+  
+  // Nettoyer les erreurs quand l'utilisateur corrige
+  colorInput.addEventListener('input', () => {
+    colorError.textContent = ''
+    colorError.classList.add('hidden')
+    colorInput.classList.remove('border-red-500')
+  })
+  
+  sizeInput.addEventListener('input', () => {
+    sizeError.textContent = ''
+    sizeError.classList.add('hidden')
+    sizeInput.classList.remove('border-red-500')
+  })
+  
+  otherAttrInput.addEventListener('input', () => { // AJOUT
+    otherAttrError.textContent = ''
+    otherAttrError.classList.add('hidden')
+    otherAttrInput.classList.remove('border-red-500')
+  })
+  
+  priceInput.addEventListener('input', () => {
+    priceError.textContent = ''
+    priceError.classList.add('hidden')
+    priceInput.classList.remove('border-red-500')
+  })
+  
+  stockInput.addEventListener('input', () => {
+    stockError.textContent = ''
+    stockError.classList.add('hidden')
+    stockInput.classList.remove('border-red-500')
+  })
+  
+  mediaInput.addEventListener('input', () => { // AJOUT
+    mediaError.textContent = ''
+    mediaError.classList.add('hidden')
+    mediaInput.classList.remove('border-red-500')
+  })
+}
+
+// Fonction de validation pour un champ de variante (MISE À JOUR)
+function validateVariantField(input, errorElement, fieldName, variantIndex) {
+  const value = input.value.trim()
+  errorElement.textContent = ''
+  errorElement.classList.add('hidden')
+  input.classList.remove('border-red-500')
+  
+  // AJOUT: Validation pour otherAttr (obligatoire si présent)
+  if (fieldName === 'otherAttr' && !value) {
+    errorElement.textContent = `L'attribut de la variante ${variantIndex} est obligatoire`
+    errorElement.classList.remove('hidden')
+    input.classList.add('border-red-500')
+    return false
+  }
+  
+  if (!value && fieldName !== 'price' && fieldName !== 'stock' && fieldName !== 'otherAttr') {
+    return true // Les champs optionnels peuvent être vides
+  }
+  
+  if (fieldName === 'price' && value) {
+    const numValue = parseFloat(value.replace(',', '.'))
+    if (isNaN(numValue)) {
+      errorElement.textContent = `Le prix de la variante ${variantIndex} doit être un nombre valide`
+      errorElement.classList.remove('hidden')
+      input.classList.add('border-red-500')
+      return false
+    }
+    if (numValue < 0) {
+      errorElement.textContent = `Le prix de la variante ${variantIndex} doit être positif`
+      errorElement.classList.remove('hidden')
+      input.classList.add('border-red-500')
+      return false
+    }
+  }
+  
+  if (fieldName === 'stock' && value) {
+    const numValue = parseInt(value)
+    if (isNaN(numValue)) {
+      errorElement.textContent = `Le stock de la variante ${variantIndex} doit être un nombre valide`
+      errorElement.classList.remove('hidden')
+      input.classList.add('border-red-500')
+      return false
+    }
+    if (numValue < 0) {
+      errorElement.textContent = `Le stock de la variante ${variantIndex} doit être positif`
+      errorElement.classList.remove('hidden')
+      input.classList.add('border-red-500')
+      return false
+    }
+  }
+  
+  return true
+}
+
+// NOUVELLE FONCTION: Validation du fichier média
+function validateMediaFile(file, errorElement, variantIndex) {
+  errorElement.textContent = ''
+  errorElement.classList.add('hidden')
+  
+  // Vérifier la taille (10MB = 10 * 1024 * 1024)
+  const maxSize = 10 * 1024 * 1024 // 10MB
+  if (file.size > maxSize) {
+    errorElement.textContent = `Le fichier de la variante ${variantIndex} ne doit pas dépasser 10MB`
+    errorElement.classList.remove('hidden')
+    return false
+  }
+  
+  // Vérifier les extensions
+  const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'mp4']
+  const fileExtension = file.name.split('.').pop().toLowerCase()
+  
+  if (!allowedExtensions.includes(fileExtension)) {
+    errorElement.textContent = `Le fichier de la variante ${variantIndex} doit être: ${allowedExtensions.join(', ')}`
+    errorElement.classList.remove('hidden')
+    return false
+  }
+  
+  return true
+}
+     // Auto-hide flash messages après 5 secondes
+  document.addEventListener('DOMContentLoaded', function() {
+    const flashMessages = document.querySelectorAll('.bg-green-500, .bg-red-500')
+    
+    flashMessages.forEach(message => {
+      setTimeout(() => {
+        message.style.animation = 'fadeOut 0.5s ease-in forwards'
+        setTimeout(() => {
+          if (message.parentElement) {
+            message.remove()
+          }
+        }, 500)
+      }, 5000)
     })
+  })
   </script>
+  <script>
+// Validation améliorée en temps réel
+document.addEventListener('DOMContentLoaded', function() {
+  const variantsContainer = document.getElementById('variantsContainer')
+  
+  // Validation avant soumission
+  const form = document.getElementById('postForm')
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      let isValid = true
+      const errorMessages = []
+      
+      // Valider le produit principal
+      const nameInput = document.getElementById('name')
+      const descriptionInput = document.getElementById('description')
+      const mediaInput = document.getElementById('media')
+      
+      if (!nameInput.value.trim()) {
+        isValid = false
+        errorMessages.push('Le nom du produit est obligatoire')
+      }
+      
+      if (!descriptionInput.value.trim()) {
+        isValid = false
+        errorMessages.push('La description est obligatoire')
+      }
+      
+      if (!mediaInput.files.length) {
+        isValid = false
+        errorMessages.push('Le fichier média principal est obligatoire')
+      }
+      
+      // Valider les variantes
+      const variantDivs = variantsContainer.querySelectorAll('div.border')
+      variantDivs.forEach((variantDiv, index) => {
+        const variantNum = index + 1
+        
+        // Récupérer les valeurs
+        const color = variantDiv.querySelector('.variant-color')?.value.trim()
+        const size = variantDiv.querySelector('.variant-size')?.value.trim()
+        const price = variantDiv.querySelector('.variant-price')?.value.trim()
+        const stock = variantDiv.querySelector('.variant-stock')?.value.trim()
+        const otherAttr = variantDiv.querySelector('input[name*="otherAttr"]')?.value.trim()
+        const mediaFile = variantDiv.querySelector('.variantMedia')?.files[0]
+        
+        // Vérifier si au moins un champ est rempli
+        const hasData = color || size || otherAttr || price || stock || mediaFile
+        
+        if (hasData) {
+          // Vérifier la logique métier
+          const hasAttribute = color || size || otherAttr
+          const hasPriceOrStock = price || stock
+          
+          if (hasAttribute && !hasPriceOrStock) {
+            isValid = false
+            errorMessages.push(`Variante ${variantNum}: Un prix ou stock est requis quand un attribut est spécifié`)
+          }
+          
+          // Vérifier prix si présent
+          if (price) {
+            const priceNum = parseFloat(price.replace(',', '.'))
+            if (isNaN(priceNum)) {
+              isValid = false
+              errorMessages.push(`Variante ${variantNum}: Le prix doit être un nombre valide`)
+            }
+            if (priceNum < 0) {
+              isValid = false
+              errorMessages.push(`Variante ${variantNum}: Le prix doit être positif`)
+            }
+          }
+          
+          // Vérifier stock si présent
+          if (stock) {
+            const stockNum = parseInt(stock)
+            if (isNaN(stockNum)) {
+              isValid = false
+              errorMessages.push(`Variante ${variantNum}: Le stock doit être un nombre valide`)
+            }
+            if (stockNum < 0) {
+              isValid = false
+              errorMessages.push(`Variante ${variantNum}: Le stock doit être positif`)
+            }
+          }
+        }
+      })
+      
+      if (!isValid) {
+        e.preventDefault()
+        
+        // Afficher toutes les erreurs dans un message
+        let errorMessage = 'Veuillez corriger les erreurs suivantes :\n\n'
+        errorMessages.forEach(msg => {
+          errorMessage += `• ${msg}\n`
+        })
+        
+        // Vous pouvez aussi afficher dans une div au lieu d'une alerte
+        const errorDiv = document.createElement('div')
+        errorDiv.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4'
+        errorDiv.innerHTML = `
+          <strong class="font-bold">Erreurs de validation :</strong>
+          <ul class="list-disc list-inside mt-2">
+            ${errorMessages.map(msg => `<li>${msg}</li>`).join('')}
+          </ul>
+        `
+        
+        // Insérer avant le formulaire
+        const formParent = form.parentElement
+        const existingError = formParent.querySelector('.bg-red-100')
+        if (existingError) existingError.remove()
+        formParent.insertBefore(errorDiv, form)
+        
+        // Scroll vers les erreurs
+        errorDiv.scrollIntoView({ behavior: 'smooth' })
+      }
+    })
+  }
+})
+</script>
 </body>
 </html>
