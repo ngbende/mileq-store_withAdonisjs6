@@ -19,7 +19,7 @@ export default class CrudProductsController {
 
         return view.render('pages/dashboard')
     }
-     public async store({ request, response }: HttpContext) {
+     public async store({ request, response,session }: HttpContext) {
     try {
       // DEBUG: Voir les données entrantes
       console.log('📥 Données reçues:', {
@@ -28,6 +28,8 @@ export default class CrudProductsController {
         price: request.input('price'),
         file: request.file('main_media_url')?.clientName
       })
+
+    
 
       // 1️⃣ Validation des données
       const validatedData = await request.validateUsing(productFormValidator)
@@ -43,7 +45,7 @@ export default class CrudProductsController {
         const fileName = `${cuid()}.${mainFile.extname}`
         
         // Sauvegarder le fichier
-        await mainFile.move(app.makePath('uploads'), {
+        await mainFile.move(app.makePath('public/uploads'), {
           name: fileName,
           overwrite: true,
         })
@@ -67,14 +69,14 @@ export default class CrudProductsController {
       console.log('📝 Données pour création:', productData)
 
       const product = await Product.create(productData)
-   // 4️⃣ Gestion des variantes de produit
+ // 4️⃣ Gestion des variantes de produit
 try {
   const validatedVariants = await request.validateUsing(productVariantsValidator)
   console.log('📦 Variantes validées:', validatedVariants)
   
   if (validatedVariants.variants && Array.isArray(validatedVariants.variants)) {
     const variantsToCreate = []
-    
+    const variantErrors: string[] = []   // pour stocker les erreurs
     for (let i = 0; i < validatedVariants.variants.length; i++) {
       const variant = validatedVariants.variants[i]
         if (!variant) continue // <-- ignore undefined
@@ -93,8 +95,13 @@ try {
         mediaType = variantFile.extname?.includes('mp4') ? 'video' : 'image'
         console.log(`📁 Fichier variante sauvegardé:`, mediaUrl)
       }
-      
-      // Nettoyer les données
+      // MAINTENANT, vérifier si le média est obligatoire
+if (!mediaUrl || !mediaType) {
+    variantErrors.push(`Variante ${i + 1} : Le fichier média est obligatoire`)
+    continue  // Arrêter ici si pas de média
+}
+
+            // Nettoyer les données
       const cleanVariant = {
         productId: product.id, // Utiliser l'ID du produit créé
         color: variant.color || null,
@@ -106,15 +113,53 @@ try {
         mediaType, // camelCase pour le modèle
       }
       
-      // Vérifier que la variante a au moins une donnée
+      // ⬇️ VALIDATION MÉTIER POUR LES VARIANTES
       const hasData = cleanVariant.color || cleanVariant.size || cleanVariant.otherAttr || 
-               cleanVariant.price || cleanVariant.stock || cleanVariant.mediaUrl
-      
-      if (hasData) {
-        variantsToCreate.push(cleanVariant)
+               cleanVariant.price !== null || cleanVariant.stock !== null || cleanVariant.mediaUrl
+
+      if (!hasData) {
+        variantErrors.push(`Variante ${i + 1} : Au moins un champ doit être rempli`)
+        continue
       }
-    }
+
+      // Vérifier si attribut présent → prix OU stock requis
+      const hasAttribute = cleanVariant.color || cleanVariant.size || cleanVariant.otherAttr
+      const hasPriceOrStock = cleanVariant.price !== null || cleanVariant.stock !== null
+
+      if (hasAttribute && !hasPriceOrStock) {
+        variantErrors.push(`Variante ${i + 1} : Un prix ou stock est requis quand un attribut est spécifié`)
+        continue
+      }
+
+      // Vérifier prix positif si présent
+      if (cleanVariant.price !== null && cleanVariant.price < 0) {
+        variantErrors.push(`Variante ${i + 1} : Le prix doit être positif`)
+        continue
+      }
+
+      // Vérifier stock positif si présent
+      if (cleanVariant.stock !== null && cleanVariant.stock < 0) {
+        variantErrors.push(`Variante ${i + 1} : Le stock doit être positif`)
+        continue
+      }
+  
+      // Si tout est bon, ajouter à la création
+      variantsToCreate.push(cleanVariant)
+    } // ⬅️ FIN DE LA BOUCLE for
     
+   // ⬇️ SI ERREURS MÉTIER, ARRÊTER (APRÈS LA BOUCLE)
+if (variantErrors.length > 0) {
+  // Convertir les erreurs métier en format compatible
+  const formattedErrors: Record<string, string[]> = {}
+  variantErrors.forEach((error, index) => {
+    formattedErrors[`variante_${index + 1}`] = [error]
+  })
+  
+  // CHANGEMENT ICI : Utilisez 'variantErrors' au lieu de 'errors' pour que ça s'affiche dans votre template
+  session.flash('variantErrors', variantErrors) // ⬅️ CHANGÉ DE 'errors' À 'variantErrors'
+  session.flashAll()
+  return response.redirect().back()
+}
     // Créer toutes les variantes
     if (variantsToCreate.length > 0) {
       await ProductVariant.createMany(variantsToCreate)
@@ -123,39 +168,172 @@ try {
   }
 } catch (error) {
   console.warn('⚠️ Erreur lors de la validation des variantes:', error.message)
-  // On continue même si les variantes ont une erreur
+   // ⬇️ SUPPRIMER LE MESSAGE "variants.0" SI IL EXISTE
+  if (error.messages && Array.isArray(error.messages)) {
+    error.messages = error.messages.filter((errObj: any) => {
+      if (!errObj || typeof errObj !== 'object') return true
+      
+      const field = errObj.field || ''
+      const message = errObj.message || ''
+      
+      // Filtrer les messages génériques sur variants
+      if (field === 'variants' && message.includes('Le champ')) {
+        return false
+      }
+      
+      // Filtrer variants.0, variants.1, etc. sans nom de champ
+      if (field.match(/^variants\.\d+$/) && message.includes('obligatoire')) {
+        return false
+      }
+      
+      return true
+    })
+  }
+  // BONNE PRATIQUE : Traitement UNIFORME des erreurs VineJS
+  const variantErrors: string[] = []
+  
+  // 1. Vérifier la structure réelle
+  if (error.messages && Array.isArray(error.messages)) {
+    // Structure: [ {field: "...", message: "..."}, {...} ]
+    error.messages.forEach((errObj: any) => {
+      if (errObj && typeof errObj === 'object') {
+        const field = errObj.field || ''
+        const message = errObj.message || 'Erreur de validation'
+        
+        // Formater proprement
+        const match = field.match(/variants\.(\d+)\.(.+)/)
+        if (match) {
+          const [, index, fieldName] = match
+       // PAR CE BLOC CORRIGÉ :
+let variantNumber = parseInt(index) + 1
+
+// SOLUTION GÉNÉRALE : Recalculer l'index réel en fonction des variantes réellement remplies
+// 1. Récupérer toutes les données de variantes brutes
+const allVariantsData = request.all().variants || []
+console.log('🔍 Toutes les variantes brutes:', allVariantsData)
+
+// 2. Trouver l'index réel (en ignorant les variantes complètement vides)
+let realVariantIndex = 0
+let found = false
+
+for (let j = 0; j < allVariantsData.length; j++) {
+  const rawVariant = allVariantsData[j] || {}
+  
+  // Vérifier si cette variante a des données
+  const hasData = rawVariant.color || rawVariant.size || rawVariant.otherAttr || 
+                 rawVariant.price || rawVariant.stock
+  
+  if (hasData) {
+    realVariantIndex++
+    
+    // Si c'est la variante qui correspond à l'index de l'erreur
+    if (j === parseInt(index)) {
+      found = true
+      break
+    }
+  }
 }
 
-      
-      // 4️⃣ Réponse
-      return response.redirect().toRoute('dashboard', {
-        success: true,
-        message: 'Produit créé avec succès',
-        data: product.toJSON()
-      })
+// 3. Si trouvé, utiliser l'index réel + 1 pour l'affichage
+if (found) {
+  variantNumber = realVariantIndex
+} else {
+  // Fallback : utiliser l'index VineJS + 1
+  variantNumber = parseInt(index) + 1
+}
+          const fieldTranslations: Record<string, string> = {
+            'color': 'Couleur',
+            'size': 'Taille', 
+            'otherAttr': 'Attribut',
+            'price': 'Prix',
+            'stock': 'Stock',
+            'media_url': 'Fichier média'
+          }
+          
+          const readableField = fieldTranslations[fieldName] || fieldName
+          
+          // Personnaliser les messages si nécessaire
+          let finalMessage = message
+          if (message.includes('required') || message.includes('obligatoire')) {
+            finalMessage = 'est obligatoire'
+          }
+          
+          variantErrors.push(`Variante ${variantNumber} - ${readableField} : ${finalMessage}`)
+        } else {
+          variantErrors.push(`${field}: ${message}`)
+        }
+      }
+    })
+  }
+  
+  // 2. Si on n'a rien extrait, fallback sur analyse de l'erreur
+  if (variantErrors.length === 0 && error.message) {
+    if (error.message.includes('otherAttr')) {
+      variantErrors.push('L\'attribut (modèle/marque/matériau) est obligatoire pour chaque variante')
+    }
+    if (error.message.includes('media_url')) {
+      variantErrors.push('Le fichier média est obligatoire pour chaque variante')
+    }
+  }
+  
+  // 3. Toujours un message minimum
+  if (variantErrors.length === 0) {
+    variantErrors.push('Veuillez corriger les erreurs dans les variantes')
+  }
+  
+  // 4. Flash UNIQUEMENT ici (pas ailleurs dans le code)
+  session.flash('variantErrors', variantErrors)
+  session.flashAll()
+  
+  return response.redirect().back()
+}
 
-    } catch (error) {
+  // AJOUT: Message de succès
+    session.flash('success', '✅ Produit créé avec succès !')
+    
+    // AJOUT: Sauvegarder les anciennes valeurs pour les ré-afficher
+    session.flashAll() // ⚠️ DOIT ÊTRE APRÈS LE SUCCÈS, PAS AVANT
+    
+    return response.redirect().toRoute('dashboard')
+
+       } catch (error) {
       console.error('❌ Erreur détaillée:', {
         message: error.message,
         code: error.code,
         stack: error.stack
       })
       
-      // Gestion des erreurs de validation
-      if (error.code === 'E_VALIDATION_ERROR') {
-        return response.status(422).json({
-          success: false,
-          message: 'Erreur de validation',
-          errors: error.messages
+if (error.code === 'E_VALIDATION_ERROR') {
+  // NE PAS écraser les variantErrors si elles existent déjà
+  if (!session.has('variantErrors')) {
+    const validationErrors: string[] = []
+    
+    for (const field in error.messages) {
+      const messages = error.messages[field]
+      
+      if (Array.isArray(messages)) {
+        messages.forEach((msg: string) => {
+          // Remplacer les indices par des numéros de variante lisibles
+          const readableField = field
+            .replace(/variants\.(\d+)\./, 'Variante $1 - ')
+            .replace(/variants\./, 'Variantes - ')
+          
+          validationErrors.push(`${readableField}: ${msg}`)
         })
+      } else if (typeof messages === 'string') {
+        validationErrors.push(`${field}: ${messages}`)
       }
-
-      // Erreur serveur
-      return response.status(500).json({
-        success: false,
-        message: 'Erreur serveur lors de la création du produit',
-        error: process.env.NODE_ENV === 'development' ? error.message : undefined
-      })
+    }
+    
+    session.flash('errors', validationErrors)
+  }
+  
+  session.flashAll()
+  return response.redirect().back()
+}
+      
+      session.flash('error', '❌ Erreur serveur lors de la création du produit')
+      return response.redirect().back()
     }
   }
 
@@ -567,3 +745,4 @@ public async adminVariants({ params, view }: HttpContext) {
   })
 }
 }
+
