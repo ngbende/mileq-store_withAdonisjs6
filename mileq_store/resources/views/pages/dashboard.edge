@@ -434,12 +434,12 @@ const addVariantBtn = document.getElementById('addVariantBtn')
 const variantsContainer = document.getElementById('variantsContainer')
 let variantCount = 0
 
-// LIGNE 465 à 550 (environ) - REMPLACEZ TOUT CE QUI SUIT :
-
 addVariantBtn.addEventListener('click', () => {
   variantCount++
   const variantDiv = document.createElement('div')
-  variantDiv.className = 'border p-3 rounded space-y-2 bg-gray-50'
+  variantDiv.className = 'border p-3 rounded space-y-2 bg-gray-50 variant-group'
+  variantDiv.setAttribute('data-variant-index', variantCount)
+  
   variantDiv.innerHTML = `
     <h4 class="font-semibold mb-2">Variante ${variantCount}</h4>
     
@@ -510,8 +510,8 @@ addVariantBtn.addEventListener('click', () => {
       <div class="variant-error media-error text-red-500 text-sm mt-1 hidden"></div>
     </div>
     
-    <button type="button" class="clearVariantBtn bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition">
-      Annuler
+    <button type="button" class="removeVariantBtn bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition">
+      Supprimer cette variante
     </button>
     
     <div class="variantPreview border border-gray-300 rounded p-2 flex justify-center items-center min-h-[100px] text-gray-400">
@@ -524,7 +524,7 @@ addVariantBtn.addEventListener('click', () => {
   // Gestion du média
   const mediaInputV = variantDiv.querySelector('.variantMedia')
   const mediaPreviewV = variantDiv.querySelector('.variantPreview')
-  const clearBtn = variantDiv.querySelector('.clearVariantBtn')
+  const removeBtn = variantDiv.querySelector('.removeVariantBtn')
   
   mediaInputV.addEventListener('change', () => {
     const file = mediaInputV.files[0]
@@ -566,42 +566,103 @@ addVariantBtn.addEventListener('click', () => {
     }
   })
   
-  clearBtn.addEventListener('click', () => {
-    mediaInputV.value = ''
-    mediaPreviewV.innerHTML = 'Aucun média sélectionné'
-    mediaPreviewV.classList.add('text-gray-400')
-    
-    // Nettoyer l'erreur
-    const mediaError = variantDiv.querySelector('.media-error')
-    mediaError.textContent = ''
-    mediaError.classList.add('hidden')
-    mediaInputV.classList.remove('border-red-500')
+  // Bouton de suppression
+  removeBtn.addEventListener('click', () => {
+    variantDiv.remove()
+    updateVariantNames()
   })
   
   // Ajouter la validation en temps réel pour cette variante
   setupVariantValidation(variantDiv, variantCount)
 })
 
+// Fonction pour mettre à jour les noms des variantes après suppression
+function updateVariantNames() {
+  const variantGroups = document.querySelectorAll('.variant-group')
+  variantGroups.forEach((group, index) => {
+    const newIndex = index + 1
+    group.setAttribute('data-variant-index', newIndex)
+    
+    // Mettre à jour le titre
+    const title = group.querySelector('h4')
+    if (title) title.textContent = `Variante ${newIndex}`
+    
+    // Mettre à jour tous les noms de champs
+    const fields = ['color', 'size', 'otherAttr', 'price', 'stock']
+    fields.forEach(field => {
+      const input = group.querySelector(`.variant-${field}`)
+      if (input) {
+        input.name = `variants[${newIndex}][${field}]`
+      }
+    })
+    
+    // Mettre à jour le champ fichier
+    const fileInput = group.querySelector('.variantMedia')
+    if (fileInput) {
+      fileInput.name = `variants[${newIndex}][media_url]`
+    }
+    
+    // Mettre à jour les messages d'erreur
+    const errors = group.querySelectorAll('.variant-error')
+    errors.forEach(error => {
+      error.textContent = error.textContent.replace(/Variante \d+/, `Variante ${newIndex}`)
+    })
+  })
+  
+  // Mettre à jour le compteur global
+  variantCount = variantGroups.length
+}
+
+// Ajoutez cette fonction pour nettoyer le formulaire avant envoi
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('postForm')
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      // Nettoyer les variantes complètement vides
+      const variantGroups = document.querySelectorAll('.variant-group')
+      
+      variantGroups.forEach(group => {
+        const color = group.querySelector('.variant-color')?.value.trim()
+        const size = group.querySelector('.variant-size')?.value.trim()
+        const otherAttr = group.querySelector('.variant-otherAttr')?.value.trim()
+        const price = group.querySelector('.variant-price')?.value.trim()
+        const stock = group.querySelector('.variant-stock')?.value.trim()
+        const mediaFile = group.querySelector('.variantMedia')?.files[0]
+        
+        // Si TOUS les champs sont vides et pas de fichier, masquer les inputs
+        if (!color && !size && !otherAttr && !price && !stock && !mediaFile) {
+          // Masquer tous les inputs de ce groupe
+          const inputs = group.querySelectorAll('input')
+          inputs.forEach(input => {
+            input.disabled = true
+            input.style.display = 'none'
+          })
+        }
+      })
+    })
+  }
+})
+
 // Fonction pour configurer la validation d'une variante
 function setupVariantValidation(variantDiv, index) {
   const colorInput = variantDiv.querySelector('.variant-color')
   const sizeInput = variantDiv.querySelector('.variant-size')
-  const otherAttrInput = variantDiv.querySelector('.variant-otherAttr') // AJOUT
+  const otherAttrInput = variantDiv.querySelector('.variant-otherAttr')
   const priceInput = variantDiv.querySelector('.variant-price')
   const stockInput = variantDiv.querySelector('.variant-stock')
-  const mediaInput = variantDiv.querySelector('.variantMedia') // AJOUT
+  const mediaInput = variantDiv.querySelector('.variantMedia')
   
   const colorError = variantDiv.querySelector('.color-error')
   const sizeError = variantDiv.querySelector('.size-error')
-  const otherAttrError = variantDiv.querySelector('.otherAttr-error') // AJOUT
+  const otherAttrError = variantDiv.querySelector('.otherAttr-error')
   const priceError = variantDiv.querySelector('.price-error')
   const stockError = variantDiv.querySelector('.stock-error')
-  const mediaError = variantDiv.querySelector('.media-error') // AJOUT
+  const mediaError = variantDiv.querySelector('.media-error')
   
   // Validation en temps réel
   colorInput.addEventListener('blur', () => validateVariantField(colorInput, colorError, 'color', index))
   sizeInput.addEventListener('blur', () => validateVariantField(sizeInput, sizeError, 'size', index))
-  otherAttrInput.addEventListener('blur', () => validateVariantField(otherAttrInput, otherAttrError, 'otherAttr', index)) // AJOUT
+  otherAttrInput.addEventListener('blur', () => validateVariantField(otherAttrInput, otherAttrError, 'otherAttr', index))
   priceInput.addEventListener('blur', () => validateVariantField(priceInput, priceError, 'price', index))
   stockInput.addEventListener('blur', () => validateVariantField(stockInput, stockError, 'stock', index))
   
@@ -630,7 +691,7 @@ function setupVariantValidation(variantDiv, index) {
     sizeInput.classList.remove('border-red-500')
   })
   
-  otherAttrInput.addEventListener('input', () => { // AJOUT
+  otherAttrInput.addEventListener('input', () => {
     otherAttrError.textContent = ''
     otherAttrError.classList.add('hidden')
     otherAttrInput.classList.remove('border-red-500')
@@ -648,21 +709,20 @@ function setupVariantValidation(variantDiv, index) {
     stockInput.classList.remove('border-red-500')
   })
   
-  mediaInput.addEventListener('input', () => { // AJOUT
+  mediaInput.addEventListener('input', () => {
     mediaError.textContent = ''
     mediaError.classList.add('hidden')
     mediaInput.classList.remove('border-red-500')
   })
 }
 
-// Fonction de validation pour un champ de variante (MISE À JOUR)
+// Fonction de validation pour un champ de variante
 function validateVariantField(input, errorElement, fieldName, variantIndex) {
   const value = input.value.trim()
   errorElement.textContent = ''
   errorElement.classList.add('hidden')
   input.classList.remove('border-red-500')
   
-  // AJOUT: Validation pour otherAttr (obligatoire si présent)
   if (fieldName === 'otherAttr' && !value) {
     errorElement.textContent = `L'attribut de la variante ${variantIndex} est obligatoire`
     errorElement.classList.remove('hidden')
@@ -671,7 +731,7 @@ function validateVariantField(input, errorElement, fieldName, variantIndex) {
   }
   
   if (!value && fieldName !== 'price' && fieldName !== 'stock' && fieldName !== 'otherAttr') {
-    return true // Les champs optionnels peuvent être vides
+    return true
   }
   
   if (fieldName === 'price' && value) {
@@ -709,20 +769,18 @@ function validateVariantField(input, errorElement, fieldName, variantIndex) {
   return true
 }
 
-// NOUVELLE FONCTION: Validation du fichier média
+// Fonction de validation du fichier média
 function validateMediaFile(file, errorElement, variantIndex) {
   errorElement.textContent = ''
   errorElement.classList.add('hidden')
   
-  // Vérifier la taille (10MB = 10 * 1024 * 1024)
-  const maxSize = 10 * 1024 * 1024 // 10MB
+  const maxSize = 10 * 1024 * 1024
   if (file.size > maxSize) {
     errorElement.textContent = `Le fichier de la variante ${variantIndex} ne doit pas dépasser 10MB`
     errorElement.classList.remove('hidden')
     return false
   }
   
-  // Vérifier les extensions
   const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'mp4']
   const fileExtension = file.name.split('.').pop().toLowerCase()
   
@@ -734,22 +792,23 @@ function validateMediaFile(file, errorElement, variantIndex) {
   
   return true
 }
-     // Auto-hide flash messages après 5 secondes
-  document.addEventListener('DOMContentLoaded', function() {
-    const flashMessages = document.querySelectorAll('.bg-green-500, .bg-red-500')
-    
-    flashMessages.forEach(message => {
+
+// Auto-hide flash messages après 5 secondes
+document.addEventListener('DOMContentLoaded', function() {
+  const flashMessages = document.querySelectorAll('.bg-green-500, .bg-red-500')
+  
+  flashMessages.forEach(message => {
+    setTimeout(() => {
+      message.style.animation = 'fadeOut 0.5s ease-in forwards'
       setTimeout(() => {
-        message.style.animation = 'fadeOut 0.5s ease-in forwards'
-        setTimeout(() => {
-          if (message.parentElement) {
-            message.remove()
-          }
-        }, 500)
-      }, 5000)
-    })
+        if (message.parentElement) {
+          message.remove()
+        }
+      }, 500)
+    }, 5000)
   })
-  </script>
+})
+</script>
   <script>
 // Validation améliorée en temps réel
 document.addEventListener('DOMContentLoaded', function() {
