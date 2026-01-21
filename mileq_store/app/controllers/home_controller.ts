@@ -14,7 +14,9 @@ export default class HomeController {
       // .where('is_featured', true) // Si vous ajoutez un champ "featured"
     
     return view.render('pages/home', { 
-      products: products.map(product => product.toJSON()) 
+      products: products.map(product => product.toJSON()), 
+        url: 'https://www.mileqstore.com/' // ou calcul dynamique avec ctx.request.url()
+
     })
   }
 }

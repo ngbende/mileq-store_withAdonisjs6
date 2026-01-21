@@ -1,9 +1,32 @@
-@layout.app({ title: 'Accueil — Mileq Store' })
+@layout.app({ title: 'Accueil — Mileq Store',
+ description: 'Découvrez nos meilleurs produits disponibles à Kinshasa.Commandez via WhatsApp.',
+  og: {
+    title: 'Produits phares — Mileq Store Kinshasa',
+    description: 'Découvrez nos meilleurs produits disponibles à Kinshasa',
+    image: firstProduct?.mainMediaUrl || '/default-image.jpg'
+  },
+  schema: true
+ })
 
 @slot('meta')
   <meta name="description" content="Découvrez nos meilleurs produits phares du moment">
 @endslot
-
+@slot('schema')
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Mileq Store",
+      "description": "Boutique en ligne de produits phares à Kinshasa",
+      "url": "{{ url('/') }}",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "{{ url('/') }}?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+  </script>
+@endslot
 @slot('styles')
   <style>
     .aspect-video {

@@ -15,6 +15,8 @@ import HomeController from '#controllers/home_controller'
 import DisconnectsController from '#controllers/disconnects_controller'
 import udapteContactAdmin from '#controllers/watsapp_settings_controller'
 import Setting from '#models/site_setting'
+import SitemapController from '#controllers/sitemaps_controller'
+import RobotsController from '#controllers/robots_controller'
 
 router.get('/', [HomeController, 'index']).as('home')
 
@@ -79,3 +81,9 @@ router.post('/admin/variants/:variantId/delete', [CrudProductsController, 'delet
 router.post('/admin/logout', [DisconnectsController, 'disconnect']).as('admin.logout').use(middleware.auth())
 // route pour la mise a jour des contacts watsapp admins 
 router.post('/admin/watsapp_settings/update', [udapteContactAdmin, 'udapteContactAdmin']).as('watsappSettings.update').use(middleware.auth())
+
+// route sitemap SEO
+router.get('/sitemap.xml', [SitemapController, 'index']).as('sitemap') 
+// route pour RobotsController
+router.get('/robots.txt', [RobotsController, 'index'])
+

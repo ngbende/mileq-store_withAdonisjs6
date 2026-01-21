@@ -3,31 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>{{ title || "Mileq Store" }}</title>
-  
+
+  <!-- Titre dynamique -->
+  <title>{{ title || 'Mileq Store' }}</title>
+
+  <!-- Description dynamique pour SEO -->
+  <meta name="description" content="{{ description || 'Découvrez nos meilleurs produits phares à Kinshasa. Commandez via WhatsApp.' }}">
+
+  <!-- Open Graph pour réseaux sociaux -->
+  @if(og)
+    <meta property="og:title" content="{{ og.title || title || 'Mileq Store' }}">
+    <meta property="og:description" content="{{ og.description || description }}">
+    <meta property="og:image" content="{{ og.image || '/images/default-og-image.jpg' }}">
+    <meta property="og:url" content="{{ url || '/' }}">
+    <meta property="og:type" content="product">
+  @endif
+
+  <!-- Localisation SEO -->
+  <meta name="geo.region" content="CD-KN">
+  <meta name="geo.placename" content="Kinshasa">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="{{ url || '/' }}">
+
+  <!-- Sitemap -->
+<link rel="sitemap" type="application/xml" href="{{ route('sitemap') }}">
+
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
+
+  <!-- Slots pour meta et styles additionnels -->
   @if ($slots.meta)
     {{{ await $slots.meta() }}}
   @endif
-  
   @if ($slots.styles)
     {{{ await $slots.styles() }}}
   @endif
 </head>
 
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
+
   <!-- HEADER -->
   <header class="bg-white shadow sticky top-0 z-20">
     <div class="max-w-7xl mx-auto flex items-center justify-between p-4 px-6">
       <h1 class="text-lg sm:text-2xl font-bold text-gray-800">
         <a href="/" class="hover:text-blue-600 transition">Mileq Store</a>
       </h1>
-
-      <nav>
-      </nav>
+      <nav></nav>
     </div>
   </header>
 
@@ -36,26 +58,21 @@
 
   <!-- FOOTER -->
   <footer class="mt-auto bg-white border-t py-6">
-    <div class="max-w-7xl mx-auto px-4">
-      <div class="text-center text-gray-500">
-        <p class="text-sm sm:text-base">&copy; {{ new Date().getFullYear() }} — Mileq Store.</p>
-        <p class="text-xs sm:text-sm mt-1 text-gray-400">Tous les prix sont en dollars américains (USD)</p>
-        
-        <div class="mt-4 flex flex-col sm:flex-row justify-center gap-4 text-xs sm:text-sm">
-          <a href="mailto:douniamang@hotmail.com" class="text-gray-400 hover:text-blue-600">
-            douniamang@hotmail.com
-          </a>
-          <span class="hidden sm:inline text-gray-300">•</span>
-          <a href="tel:+243814443461" class="text-gray-400 hover:text-blue-600">
-            +243 814443461
-          </a>
-        </div>
+    <div class="max-w-7xl mx-auto px-4 text-center text-gray-500">
+      <p class="text-sm sm:text-base">&copy; {{ new Date().getFullYear() }} — Mileq Store.</p>
+      <p class="text-xs sm:text-sm mt-1 text-gray-400">Tous les prix sont en dollars américains (USD)</p>
+      <div class="mt-4 flex flex-col sm:flex-row justify-center gap-4 text-xs sm:text-sm">
+        <a href="mailto:douniamang@hotmail.com" class="text-gray-400 hover:text-blue-600">douniamang@hotmail.com</a>
+        <span class="hidden sm:inline text-gray-300">•</span>
+        <a href="tel:+243814443461" class="text-gray-400 hover:text-blue-600">+243 814443461</a>
       </div>
     </div>
   </footer>
 
+  <!-- Scripts additionnels -->
   @if ($slots.scripts)
     {{{ await $slots.scripts() }}}
   @endif
+
 </body>
 </html>
