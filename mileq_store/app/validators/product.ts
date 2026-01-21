@@ -69,7 +69,7 @@ export const productVariantsValidator = vine.compile(
       vine.object({
         color: vine.string().trim().maxLength(50).optional(),
         size: vine.string().trim().maxLength(20).optional(),
-        otherAttr: vine.string().trim().maxLength(100),
+        otherAttr: vine.string().trim().minLength(2).maxLength(100).optional(),
         price: vine.string().optional().transform(parsePrice),
         stock: vine.string().optional().transform(parseStock),
         media_url: vine

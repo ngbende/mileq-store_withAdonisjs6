@@ -1,21 +1,34 @@
-@layout.app({ title: 'Variantes de ' + product.name + ' — Mileq Store' })
-
+@layout.app({
+  title: product.name + ' — Tous les modèles disponibles à Kinshasa | Mileq Store'
+})
 @slot('meta')
-  <meta name="description" content="Découvrez tous les modèles de {{ product.name }}">
+  <meta name="description"
+        content="Découvrez tous les modèles de {{ product.name }} disponibles à Kinshasa. {{ variants.length }} modèle(s). Commandez via WhatsApp.">
+
+  <meta property="og:title"
+        content="{{ product.name }} — Modèles disponibles">
+
+  <meta property="og:description"
+        content="Découvrez tous les modèles de {{ product.name }}">
+
+  <meta property="og:image"
+        content="{{ product.mainMediaUrl }}">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "{{ product.name }}",
+    "description": "{{ product.description | replace('"', '\\"') }}",
+    "image": "{{ product.mainMediaUrl }}",
+    "brand": { "@type": "Brand", "name": "Mileq Store" },
+    "sku": "PROD{{ product.id }}",
+    "dateModified": "{{ product.updatedAt.toISODate() }}"
+  }
+  </script>
 @endslot
 
-@slot('styles')
-  <style>
-    .aspect-video {
-      aspect-ratio: 16 / 9;
-    }
-    @media (min-width: 640px) {
-      .aspect-video {
-        aspect-ratio: 4 / 3;
-      }
-    }
-  </style>
-@endslot
+
 
 @slot('main')
   <!-- Breadcrumb -->
